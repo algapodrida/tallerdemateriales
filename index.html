@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandbox Elemental - Laboratorio de Partículas</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-dark: #0a0e15;
+            --bg-panel: #131920;
+            --accent-cyan: #00fff2;
+            --accent-magenta: #ff00aa;
+            --accent-yellow: #ffeb3b;
+            --text-primary: #e0e7ff;
+            --text-secondary: #7a8aaa;
+            --border-glow: rgba(0, 255, 242, 0.3);
+        }
+        
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1430 100%);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 242, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 242, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        header {
+            background: var(--bg-panel);
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid var(--accent-cyan);
+            box-shadow: 0 4px 20px rgba(0, 255, 242, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 30px rgba(0, 255, 242, 0.5);
+            animation: titlePulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes titlePulse {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .sidebar {
+            background: var(--bg-panel);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 12px;
+            padding: 1.5rem;
+            width: 320px;
+            box-shadow: 0 8px 32px rgba(0, 255, 242, 0.15);
+            overflow-y: auto;
+            max-height: calc(100vh - 150px);
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+            border-radius: 4px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--accent-cyan);
+            border-radius: 4px;
+        }
+        
+        .material-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .material-btn {
+            background: linear-gradient(135deg, var(--bg-dark), #1a1f2e);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+        }
+        
+        .material-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .material-btn:hover::before {
+            opacity: 1;
+        }
+        
+        .material-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 242, 0.3);
+        }
+        
+        .material-btn.active {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px var(--border-glow), inset 0 0 20px rgba(0, 255, 242, 0.1);
+            animation: activePulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes activePulse {
+            0%, 100% { box-shadow: 0 0 20px var(--border-glow), inset 0 0 20px rgba(0, 255, 242, 0.1); }
+            50% { box-shadow: 0 0 30px rgba(0, 255, 242, 0.5), inset 0 0 30px rgba(0, 255, 242, 0.2); }
+        }
+        
+        .material-color {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            margin: 0 auto 0.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .controls {
+            background: rgba(19, 25, 32, 0.8);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .control-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .btn-control {
+            background: linear-gradient(135deg, var(--bg-dark), #1a1f2e);
+            border: 2px solid var(--accent-magenta);
+            color: var(--text-primary);
+            padding: 0.7rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            width: 100%;
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+        
+        .btn-control:hover {
+            background: linear-gradient(135deg, #1a1f2e, var(--bg-dark));
+            box-shadow: 0 4px 15px rgba(255, 0, 170, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .btn-control:active {
+            transform: translateY(0);
+        }
+        
+        .slider-container {
+            margin-top: 1rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-yellow);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 235, 59, 0.6);
+            border: 2px solid var(--bg-dark);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-yellow);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 235, 59, 0.6);
+            border: 2px solid var(--bg-dark);
+        }
+        
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        canvas {
+            border: 3px solid var(--accent-cyan);
+            border-radius: 12px;
+            box-shadow: 
+                0 0 40px rgba(0, 255, 242, 0.4),
+                0 0 80px rgba(255, 0, 170, 0.2);
+            cursor: crosshair;
+            background: #000000;
+            animation: canvasGlow 4s ease-in-out infinite;
+        }
+        
+        @keyframes canvasGlow {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 40px rgba(0, 255, 242, 0.4),
+                    0 0 80px rgba(255, 0, 170, 0.2);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 60px rgba(0, 255, 242, 0.6),
+                    0 0 100px rgba(255, 0, 170, 0.3);
+            }
+        }
+        
+        .info-text {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(0, 255, 242, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>⚛ Sandbox Elemental ⚛</h1>
+    </header>
+    
+    <div class="container">
+        <aside class="sidebar">
+            <div class="section-title">Materiales</div>
+            <div class="material-grid" id="materialGrid"></div>
+            
+            <div class="controls">
+                <div class="section-title">Controles</div>
+                <label class="control-label">Tamaño del Pincel</label>
+                <div class="slider-container">
+                    <input type="range" id="brushSize" min="1" max="20" value="5">
+                    <div class="info-text">Tamaño: <span id="brushValue">5</span>px</div>
+                </div>
+                
+                <button class="btn-control" id="clearBtn">🗑️ Limpiar Todo</button>
+                <button class="btn-control" id="pauseBtn">⏸️ Pausar</button>
+                
+                <div class="info-text" style="margin-top: 1rem;">
+                    💡 Click y arrastra para dibujar<br>
+                    🎨 Experimenta con diferentes materiales<br>
+                    💥 ¡Crea reacciones explosivas!
+                </div>
+            </div>
+        </aside>
+        
+        <div class="canvas-container">
+            <canvas id="canvas" width="800" height="600"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        // Materiales del juego
+        const materials = {
+            sand: {
+                name: 'Arena',
+                color: '#f4a460',
+                density: 1.5,
+                type: 'powder',
+                update: movePowder
+            },
+            water: {
+                name: 'Agua',
+                color: '#1e90ff',
+                density: 1,
+                type: 'liquid',
+                update: moveLiquid
+            },
+            stone: {
+                name: 'Piedra',
+                color: '#696969',
+                density: 10,
+                type: 'solid',
+                update: () => {}
+            },
+            fire: {
+                name: 'Fuego',
+                color: '#ff4500',
+                density: 0.1,
+                type: 'gas',
+                life: 60,
+                update: updateFire
+            },
+            ice: {
+                name: 'Hielo',
+                color: '#87ceeb',
+                density: 0.9,
+                type: 'solid',
+                temperature: -20,
+                update: updateIce
+            },
+            lava: {
+                name: 'Lava',
+                color: '#ff4500',
+                density: 2,
+                type: 'liquid',
+                temperature: 1000,
+                update: updateLava
+            },
+            plant: {
+                name: 'Planta',
+                color: '#32cd32',
+                density: 0.8,
+                type: 'solid',
+                growthRate: 0.008,
+                update: updatePlant
+            },
+            explosive: {
+                name: 'C4',
+                color: '#ffeb3b',
+                density: 1,
+                type: 'solid',
+                unstable: true,
+                update: updateExplosive
+            },
+            steam: {
+                name: 'Vapor',
+                color: '#f0f0f0',
+                density: 0.05,
+                type: 'gas',
+                life: 120,
+                update: updateSteam
+            },
+            acid: {
+                name: 'Ácido',
+                color: '#adff2f',
+                density: 1.2,
+                type: 'liquid',
+                corrosive: true,
+                update: updateAcid
+            },
+            metal: {
+                name: 'Metal',
+                color: '#b8b8b8',
+                density: 7,
+                type: 'solid',
+                conductive: true,
+                melting: 1500,
+                update: updateMetal
+            },
+            oil: {
+                name: 'Aceite',
+                color: '#654321',
+                density: 0.8,
+                type: 'liquid',
+                flammable: true,
+                update: updateOil
+            },
+            wood: {
+                name: 'Madera',
+                color: '#8b4513',
+                density: 0.6,
+                type: 'solid',
+                flammable: true,
+                burnTime: 200,
+                update: updateWood
+            },
+            gunpowder: {
+                name: 'Pólvora',
+                color: '#2f2f2f',
+                density: 1.3,
+                type: 'powder',
+                explosive: true,
+                update: updateGunpowder
+            },
+            petroleum: {
+                name: 'Petróleo',
+                color: '#1a1a1a',
+                density: 0.85,
+                type: 'liquid',
+                flammable: true,
+                volatile: true,
+                update: updatePetroleum
+            },
+            seed: {
+                name: 'Semilla',
+                color: '#a0522d',
+                density: 1.2,
+                type: 'powder',
+                canGrow: true,
+                update: updateSeed
+            },
+            glass: {
+                name: 'Vidrio',
+                color: '#e6f3ff',
+                density: 2.5,
+                type: 'solid',
+                transparent: true,
+                melting: 1400,
+                update: updateGlass
+            },
+            smoke: {
+                name: 'Humo',
+                color: '#505050',
+                density: 0.03,
+                type: 'gas',
+                life: 150,
+                update: updateSmoke
+            },
+            salt: {
+                name: 'Sal',
+                color: '#ffffff',
+                density: 2.1,
+                type: 'powder',
+                dissolvable: true,
+                update: updateSalt
+            },
+            concrete: {
+                name: 'Hormigón',
+                color: '#888888',
+                density: 2.4,
+                type: 'solid',
+                resistant: true,
+                update: () => {}
+            },
+            coal: {
+                name: 'Carbón',
+                color: '#1c1c1c',
+                density: 1.4,
+                type: 'solid',
+                flammable: true,
+                burnTime: 400,
+                update: updateCoal
+            },
+            obsidian: {
+                name: 'Obsidiana',
+                color: '#0f0820',
+                density: 2.6,
+                type: 'solid',
+                resistant: true,
+                update: () => {}
+            },
+            dirt: {
+                name: 'Tierra',
+                color: '#5c4033',
+                density: 1.6,
+                type: 'powder',
+                fertile: true,
+                update: updateDirt
+            },
+            methane: {
+                name: 'Metano',
+                color: '#90ee90',
+                density: 0.02,
+                type: 'gas',
+                explosive: true,
+                life: 200,
+                update: updateMethane
+            },
+            helium: {
+                name: 'Helio',
+                color: '#ffb6c1',
+                density: 0.01,
+                type: 'gas',
+                life: 300,
+                update: updateHelium
+            },
+            plasma: {
+                name: 'Plasma',
+                color: '#ff00ff',
+                density: 0.08,
+                type: 'gas',
+                life: 80,
+                temperature: 5000,
+                update: updatePlasma
+            },
+            uranium: {
+                name: 'Uranio',
+                color: '#00ff00',
+                density: 19,
+                type: 'solid',
+                radioactive: true,
+                update: updateUranium
+            },
+            neutron: {
+                name: 'Neutrón',
+                color: '#00ffff',
+                density: 0.5,
+                type: 'powder',
+                life: 100,
+                update: updateNeutron
+            },
+            electricity: {
+                name: 'Electricidad',
+                color: '#ffff00',
+                density: 0,
+                type: 'energy',
+                life: 20,
+                update: updateElectricity
+            },
+            antimatter: {
+                name: 'Antimateria',
+                color: '#9400d3',
+                density: 1,
+                type: 'powder',
+                update: updateAntimatter
+            }
+        };
+        
+        let grid = Array(height).fill(null).map(() => Array(width).fill(null));
+        let selectedMaterial = 'sand';
+        let brushSize = 5;
+        let isDrawing = false;
+        let isPaused = false;
+        
+        // Inicializar interfaz
+        function initUI() {
+            const materialGrid = document.getElementById('materialGrid');
+            
+            Object.keys(materials).forEach(key => {
+                const material = materials[key];
+                const btn = document.createElement('button');
+                btn.className = 'material-btn';
+                btn.innerHTML = `
+                    <div class="material-color" style="background: ${material.color}"></div>
+                    <div>${material.name}</div>
+                `;
+                btn.onclick = () => {
+                    document.querySelectorAll('.material-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedMaterial = key;
+                };
+                materialGrid.appendChild(btn);
+            });
+            
+            document.querySelector('.material-btn').classList.add('active');
+            
+            document.getElementById('brushSize').oninput = (e) => {
+                brushSize = parseInt(e.target.value);
+                document.getElementById('brushValue').textContent = brushSize;
+            };
+            
+            document.getElementById('clearBtn').onclick = () => {
+                grid = Array(height).fill(null).map(() => Array(width).fill(null));
+            };
+            
+            document.getElementById('pauseBtn').onclick = function() {
+                isPaused = !isPaused;
+                this.textContent = isPaused ? '▶️ Reanudar' : '⏸️ Pausar';
+            };
+        }
+        
+        // Funciones de movimiento
+        function movePowder(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            // Velocidad de caída basada en densidad
+            const fallSpeed = Math.min(Math.ceil(particle.density / 1.5), 3);
+            
+            // Intentar caer más rápido según densidad
+            for (let i = 1; i <= fallSpeed; i++) {
+                if (y + i < height && !grid[y + i][x]) {
+                    grid[y + i][x] = particle;
+                    grid[y][x] = null;
+                    return;
+                }
+            }
+            
+            // Caer hacia abajo
+            if (y < height - 1 && !grid[y + 1][x]) {
+                grid[y + 1][x] = particle;
+                grid[y][x] = null;
+                return;
+            }
+            
+            // Caer en diagonal
+            const dir = Math.random() < 0.5 ? -1 : 1;
+            if (y < height - 1 && x + dir >= 0 && x + dir < width && !grid[y + 1][x + dir]) {
+                grid[y + 1][x + dir] = particle;
+                grid[y][x] = null;
+                return;
+            }
+            
+            if (y < height - 1 && x - dir >= 0 && x - dir < width && !grid[y + 1][x - dir]) {
+                grid[y + 1][x - dir] = particle;
+                grid[y][x] = null;
+            }
+        }
+        
+        function moveLiquid(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            // Caer hacia abajo
+            if (y < height - 1 && !grid[y + 1][x]) {
+                grid[y + 1][x] = particle;
+                grid[y][x] = null;
+                return;
+            }
+            
+            // Moverse horizontalmente
+            const dir = Math.random() < 0.5 ? -1 : 1;
+            for (let i = 1; i <= 3; i++) {
+                if (x + dir * i >= 0 && x + dir * i < width && !grid[y][x + dir * i]) {
+                    grid[y][x + dir * i] = particle;
+                    grid[y][x] = null;
+                    return;
+                }
+            }
+        }
+        
+        function updateFire(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            particle.life = (particle.life || 60) - 1;
+            
+            if (particle.life <= 0) {
+                // Ocasionalmente dejar humo
+                if (Math.random() < 0.3) {
+                    grid[y][x] = { ...materials.smoke, life: 100 };
+                } else {
+                    grid[y][x] = null;
+                }
+                return;
+            }
+            
+            // El fuego sube
+            if (y > 0 && !grid[y - 1][x] && Math.random() < 0.7) {
+                grid[y - 1][x] = particle;
+                grid[y][x] = null;
+                return;
+            }
+            
+            // Encender materiales cercanos - MÁS AGRESIVO
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor) {
+                            if ((neighbor.type === 'oil' || neighbor.type === 'petroleum') && Math.random() < 0.25) {
+                                grid[ny][nx] = { ...materials.fire, life: 120 };
+                                // Propagar a otros combustibles cerca
+                                for (let i = -1; i <= 1; i++) {
+                                    for (let j = -1; j <= 1; j++) {
+                                        const px = nx + i;
+                                        const py = ny + j;
+                                        if (px >= 0 && px < width && py >= 0 && py < height) {
+                                            const p = grid[py][px];
+                                            if (p && (p.type === 'oil' || p.type === 'petroleum') && Math.random() < 0.3) {
+                                                grid[py][px] = { ...materials.fire, life: 120 };
+                                            }
+                                        }
+                                    }
+                                }
+                            } else if (neighbor.type === 'explosive' && Math.random() < 0.08) {
+                                explode(nx, ny, 15);
+                            } else if (neighbor.type === 'gunpowder' && Math.random() < 0.15) {
+                                explode(nx, ny, 12);
+                            } else if (neighbor.type === 'plant' && Math.random() < 0.08) {
+                                grid[ny][nx] = { ...materials.fire, life: 50 };
+                            } else if (neighbor.type === 'wood' && !neighbor.burning && Math.random() < 0.12) {
+                                neighbor.burning = true;
+                                neighbor.burnTime = 200;
+                            } else if (neighbor.type === 'coal' && !neighbor.burning && Math.random() < 0.15) {
+                                neighbor.burning = true;
+                                neighbor.burnTime = 400;
+                            } else if (neighbor.type === 'ice' && Math.random() < 0.3) {
+                                grid[ny][nx] = { ...materials.water };
+                                particle.life -= 20;
+                                // Crear vapor visible
+                                if (Math.random() < 0.5) {
+                                    const vx = nx + (Math.random() < 0.5 ? -1 : 1);
+                                    const vy = ny - 1;
+                                    if (vx >= 0 && vx < width && vy >= 0 && !grid[vy][vx]) {
+                                        grid[vy][vx] = { ...materials.steam, life: 100 };
+                                    }
+                                }
+                            } else if (neighbor.type === 'water' && Math.random() < 0.4) {
+                                grid[ny][nx] = { ...materials.steam, life: 100 };
+                                grid[y][x] = { ...materials.steam, life: 80 };
+                                return;
+                            } else if (neighbor.type === 'methane' && Math.random() < 0.3) {
+                                explode(nx, ny, 18);
+                                return;
+                            } else if (neighbor.type === 'dirt' && Math.random() < 0.02) {
+                                // Tierra se quema lentamente
+                                grid[ny][nx] = { ...materials.dirt, color: '#1a0f0a' };
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Variación de color según vida
+            if (particle.life > 40) {
+                particle.color = '#ff4500';
+            } else if (particle.life > 20) {
+                particle.color = '#ff6600';
+            } else {
+                particle.color = '#ff8c00';
+            }
+        }
+        
+        function updateIce(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            // Enfriar partículas cercanas
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height && Math.random() < 0.01) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor) {
+                            if (neighbor.type === 'water') {
+                                grid[ny][nx] = { ...materials.ice };
+                            } else if (neighbor.type === 'fire') {
+                                grid[ny][nx] = { ...materials.steam, life: 100 };
+                            } else if (neighbor.type === 'lava') {
+                                grid[ny][nx] = { ...materials.stone };
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updateLava(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            // Efecto de brillo pulsante en la lava
+            const pulse = Math.sin(Date.now() / 200) * 0.3 + 0.7;
+            particle.color = `rgb(${Math.floor(255 * pulse)}, ${Math.floor(69 * pulse)}, 0)`;
+            
+            // Verificar contacto con agua ANTES de moverse - REACCIÓN MUY VISIBLE
+            let touchingWater = false;
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && neighbor.type === 'water') {
+                            touchingWater = true;
+                            grid[ny][nx] = { ...materials.steam, life: 100 };
+                            grid[y][x] = { ...materials.stone };
+                            
+                            // Crear efecto visual dramático de vapor
+                            for (let i = 0; i < 12; i++) {
+                                const angle = (Math.PI * 2 * i) / 12;
+                                const dist = Math.floor(Math.random() * 3) + 2;
+                                const fx = Math.round(x + Math.cos(angle) * dist);
+                                const fy = Math.round(y + Math.sin(angle) * dist);
+                                if (fx >= 0 && fx < width && fy >= 0 && fy < height && !grid[fy][fx]) {
+                                    grid[fy][fx] = { ...materials.steam, life: 120 };
+                                }
+                            }
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            moveLiquid(x, y);
+            
+            // La lava quema y derrite cosas - más agresiva
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height && Math.random() < 0.15) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor) {
+                            if (neighbor.type === 'plant' || neighbor.type === 'wood') {
+                                grid[ny][nx] = { ...materials.fire, life: 100 };
+                                // Generar humo
+                                if (ny > 0 && !grid[ny-1][nx] && Math.random() < 0.5) {
+                                    grid[ny-1][nx] = { ...materials.smoke, life: 150 };
+                                }
+                            } else if (neighbor.type === 'oil' || neighbor.type === 'petroleum') {
+                                grid[ny][nx] = { ...materials.fire, life: 120 };
+                            } else if (neighbor.type === 'ice') {
+                                grid[ny][nx] = { ...materials.water };
+                                // Crear vapor del hielo derretido
+                                if (Math.random() < 0.3) {
+                                    const vx = nx + (Math.random() < 0.5 ? -1 : 1);
+                                    const vy = ny - 1;
+                                    if (vx >= 0 && vx < width && vy >= 0 && !grid[vy][vx]) {
+                                        grid[vy][vx] = { ...materials.steam, life: 80 };
+                                    }
+                                }
+                            } else if (neighbor.type === 'gunpowder') {
+                                explode(nx, ny, 15);
+                            } else if (neighbor.type === 'coal' && !neighbor.burning) {
+                                neighbor.burning = true;
+                                neighbor.burnTime = 400;
+                            } else if (neighbor.type === 'glass' && Math.random() < 0.02) {
+                                grid[ny][nx] = { ...materials.lava };
+                            } else if (neighbor.type === 'dirt' && Math.random() < 0.05) {
+                                grid[ny][nx] = { ...materials.stone };
+                            } else if (neighbor.type === 'sand' && Math.random() < 0.03) {
+                                grid[ny][nx] = { ...materials.glass };
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Lava genera fuego arriba ocasionalmente
+            if (Math.random() < 0.05 && y > 0 && !grid[y-1][x]) {
+                grid[y-1][x] = { ...materials.fire, life: 60 };
+            }
+        }
+        
+        function updatePlant(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            // Las plantas crecen
+            if (Math.random() < (particle.growthRate || 0.01)) {
+                const directions = [
+                    [0, -1], // arriba
+                    [-1, 0], [1, 0], // lados
+                    [0, 1] // abajo (menos probable)
+                ];
+                
+                const dir = directions[Math.floor(Math.random() * directions.length)];
+                const nx = x + dir[0];
+                const ny = y + dir[1];
+                
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height && !grid[ny][nx]) {
+                    // Buscar agua cerca para crecer más rápido
+                    let hasWater = false;
+                    for (let dy = -2; dy <= 2; dy++) {
+                        for (let dx = -2; dx <= 2; dx++) {
+                            const checkX = x + dx;
+                            const checkY = y + dy;
+                            if (checkX >= 0 && checkX < width && checkY >= 0 && checkY < height) {
+                                const neighbor = grid[checkY][checkX];
+                                if (neighbor && neighbor.type === 'water') {
+                                    hasWater = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (hasWater) break;
+                    }
+                    
+                    if (hasWater || Math.random() < 0.3) {
+                        grid[ny][nx] = { ...materials.plant, growthRate: particle.growthRate * 0.95 };
+                    }
+                }
+            }
+        }
+        
+        function updateExplosive(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            // Verificar presión o contacto con fuego
+            let pressure = 0;
+            let touchingFire = false;
+            
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor) {
+                            if (neighbor.type === 'fire' || neighbor.type === 'lava') {
+                                touchingFire = true;
+                            }
+                            pressure++;
+                        }
+                    }
+                }
+            }
+            
+            if (touchingFire || (pressure > 6 && Math.random() < 0.1)) {
+                explode(x, y, 20);
+            }
+        }
+        
+        function explode(x, y, radius) {
+            // Crear un efecto de explosión más visible
+            for (let dy = -radius; dy <= radius; dy++) {
+                for (let dx = -radius; dx <= radius; dx++) {
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist <= radius) {
+                        const nx = x + dx;
+                        const ny = y + dy;
+                        if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                            const intensity = 1 - dist / radius;
+                            if (Math.random() < intensity * 0.9) {
+                                // Núcleo de la explosión: plasma
+                                if (dist < radius * 0.3) {
+                                    grid[ny][nx] = { ...materials.plasma, life: Math.floor(100 * intensity) };
+                                }
+                                // Zona intermedia: fuego intenso
+                                else if (dist < radius * 0.6) {
+                                    grid[ny][nx] = { ...materials.fire, life: Math.floor(80 * intensity) };
+                                }
+                                // Zona exterior: fuego y humo
+                                else if (Math.random() < 0.6) {
+                                    grid[ny][nx] = { ...materials.fire, life: Math.floor(60 * intensity) };
+                                } else if (Math.random() < 0.4) {
+                                    grid[ny][nx] = { ...materials.smoke, life: Math.floor(120 * intensity) };
+                                } else {
+                                    grid[ny][nx] = null;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Añadir partículas que vuelan hacia afuera
+            for (let i = 0; i < 20; i++) {
+                const angle = (Math.PI * 2 * i) / 20;
+                const dist = radius + Math.floor(Math.random() * 10);
+                const fx = Math.round(x + Math.cos(angle) * dist);
+                const fy = Math.round(y + Math.sin(angle) * dist);
+                if (fx >= 0 && fx < width && fy >= 0 && fy < height) {
+                    if (Math.random() < 0.5) {
+                        grid[fy][fx] = { ...materials.fire, life: 50 };
+                    } else {
+                        grid[fy][fx] = { ...materials.smoke, life: 130 };
+                    }
+                }
+            }
+        }
+        
+        function updateSteam(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            particle.life = (particle.life || 120) - 1;
+            
+            if (particle.life <= 0) {
+                if (Math.random() < 0.5) {
+                    grid[y][x] = { ...materials.water };
+                } else {
+                    grid[y][x] = null;
+                }
+                return;
+            }
+            
+            // El vapor sube
+            if (y > 0 && (!grid[y - 1][x] || (grid[y - 1][x] && grid[y - 1][x].density > 0.05)) && Math.random() < 0.8) {
+                grid[y - 1][x] = particle;
+                grid[y][x] = null;
+            }
+        }
+        
+        function updateAcid(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            moveLiquid(x, y);
+            
+            // El ácido corroe materiales
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height && Math.random() < 0.05) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && neighbor.type !== 'acid' && neighbor.type !== 'metal' && 
+                            neighbor.type !== 'stone' && neighbor.type !== 'concrete' && 
+                            neighbor.type !== 'obsidian' && neighbor.type !== 'glass') {
+                            grid[ny][nx] = null;
+                            if (Math.random() < 0.3) {
+                                grid[y][x] = null; // El ácido se consume
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updateWood(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            // La madera arde lentamente
+            if (particle.burning) {
+                particle.burnTime = (particle.burnTime || 200) - 1;
+                particle.color = particle.burnTime > 100 ? '#654321' : '#3d2817';
+                
+                if (particle.burnTime <= 0) {
+                    if (Math.random() < 0.7) {
+                        grid[y][x] = { ...materials.fire, life: 30 };
+                    } else {
+                        grid[y][x] = null;
+                    }
+                    return;
+                }
+                
+                // Propagar fuego a madera adyacente
+                if (Math.random() < 0.05) {
+                    const dirs = [[-1,0], [1,0], [0,-1], [0,1]];
+                    const dir = dirs[Math.floor(Math.random() * dirs.length)];
+                    const nx = x + dir[0];
+                    const ny = y + dir[1];
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && neighbor.type === 'wood' && !neighbor.burning) {
+                            neighbor.burning = true;
+                            neighbor.burnTime = 200;
+                        }
+                    }
+                }
+                
+                // Generar humo
+                if (Math.random() < 0.1 && y > 0 && !grid[y-1][x]) {
+                    grid[y-1][x] = { ...materials.smoke, life: 150 };
+                }
+            }
+            
+            // Verificar contacto con fuego
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && (neighbor.type === 'fire' || neighbor.type === 'lava') && 
+                            Math.random() < 0.3) {
+                            particle.burning = true;
+                            particle.burnTime = 200;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updateGunpowder(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            movePowder(x, y);
+            
+            // Verificar contacto con fuego
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && (neighbor.type === 'fire' || neighbor.type === 'lava')) {
+                            explode(x, y, 12);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updatePetroleum(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            moveLiquid(x, y);
+            
+            // El petróleo es muy inflamable
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && (neighbor.type === 'fire' || neighbor.type === 'lava') && 
+                            Math.random() < 0.4) {
+                            grid[y][x] = { ...materials.fire, life: 120 };
+                            // Propagar fuego rápidamente
+                            if (Math.random() < 0.5) {
+                                for (let i = -1; i <= 1; i++) {
+                                    for (let j = -1; j <= 1; j++) {
+                                        const px = x + i;
+                                        const py = y + j;
+                                        if (px >= 0 && px < width && py >= 0 && py < height) {
+                                            const p = grid[py][px];
+                                            if (p && p.type === 'petroleum') {
+                                                grid[py][px] = { ...materials.fire, life: 120 };
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updateSeed(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            movePowder(x, y);
+            
+            // Las semillas necesitan agua para germinar
+            let hasWater = false;
+            let hasDirt = false;
+            let waterCount = 0;
+            let dirtCount = 0;
+            
+            // Verificar si hay agua y tierra cerca
+            for (let dy = -3; dy <= 3; dy++) {
+                for (let dx = -3; dx <= 3; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && neighbor.type === 'water') {
+                            hasWater = true;
+                            waterCount++;
+                        }
+                        if (neighbor && neighbor.type === 'dirt') {
+                            hasDirt = true;
+                            dirtCount++;
+                        }
+                    }
+                }
+            }
+            
+            // Calcular probabilidad de germinación
+            let growthChance = 0;
+            if (hasWater && hasDirt) {
+                // Condiciones óptimas: agua + tierra
+                growthChance = 0.05 + (dirtCount * 0.002) + (waterCount * 0.001);
+            } else if (hasWater) {
+                // Solo agua
+                growthChance = 0.015;
+            } else if (hasDirt) {
+                // Solo tierra (muy bajo)
+                growthChance = 0.002;
+            }
+            
+            // Germinar con efectos visuales
+            if (growthChance > 0 && Math.random() < growthChance) {
+                grid[y][x] = { ...materials.plant, growthRate: hasDirt ? 0.025 : 0.012 };
+                
+                // Crear efecto visual de germinación
+                for (let i = 0; i < 8; i++) {
+                    const angle = (Math.PI * 2 * i) / 8;
+                    const dist = 2;
+                    const fx = Math.round(x + Math.cos(angle) * dist);
+                    const fy = Math.round(y + Math.sin(angle) * dist);
+                    if (fx >= 0 && fx < width && fy >= 0 && fy < height && !grid[fy][fx]) {
+                        if (Math.random() < 0.3) {
+                            grid[fy][fx] = { ...materials.plant, color: '#90ee90', growthRate: 0.001 };
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updateGlass(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            // El vidrio se derrite con calor extremo
+            let heat = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && neighbor.type === 'lava') {
+                            heat += 2;
+                        } else if (neighbor && neighbor.type === 'fire') {
+                            heat += 1;
+                        }
+                    }
+                }
+            }
+            
+            if (heat > 3 && Math.random() < 0.01) {
+                grid[y][x] = { ...materials.lava };
+            }
+        }
+        
+        function updateSmoke(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            particle.life = (particle.life || 150) - 1;
+            
+            if (particle.life <= 0) {
+                grid[y][x] = null;
+                return;
+            }
+            
+            // El humo sube y se dispersa
+            if (y > 0 && Math.random() < 0.9) {
+                const drift = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+                const nx = x + drift;
+                if (nx >= 0 && nx < width && !grid[y - 1][nx]) {
+                    grid[y - 1][nx] = particle;
+                    grid[y][x] = null;
+                }
+            }
+            
+            // Cambiar opacidad con el tiempo
+            const opacity = Math.floor((particle.life / 150) * 80 + 30);
+            particle.color = `rgb(${opacity}, ${opacity}, ${opacity})`;
+        }
+        
+        function updateSalt(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            movePowder(x, y);
+            
+            // La sal se disuelve en agua
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && neighbor.type === 'water' && Math.random() < 0.05) {
+                            grid[y][x] = { ...materials.water, salty: true };
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updateCoal(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            // El carbón arde muy lentamente y genera mucho calor
+            if (particle.burning) {
+                particle.burnTime = (particle.burnTime || 400) - 1;
+                particle.color = particle.burnTime > 200 ? '#cc4400' : '#ff6600';
+                
+                if (particle.burnTime <= 0) {
+                    grid[y][x] = null;
+                    return;
+                }
+                
+                // Generar fuego arriba
+                if (Math.random() < 0.15 && y > 0 && !grid[y-1][x]) {
+                    grid[y-1][x] = { ...materials.fire, life: 80 };
+                }
+                
+                // Generar humo
+                if (Math.random() < 0.08 && y > 0) {
+                    const nx = x + (Math.random() < 0.5 ? -1 : 1);
+                    if (nx >= 0 && nx < width && y > 0 && !grid[y-1][nx]) {
+                        grid[y-1][nx] = { ...materials.smoke, life: 180 };
+                    }
+                }
+            }
+            
+            // Verificar contacto con fuego
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && (neighbor.type === 'fire' || neighbor.type === 'lava') && 
+                            Math.random() < 0.2) {
+                            particle.burning = true;
+                            particle.burnTime = 400;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updateMetal(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            // El metal se derrite a temperaturas muy altas
+            let nearLava = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && neighbor.type === 'lava') {
+                            nearLava++;
+                        }
+                    }
+                }
+            }
+            
+            if (nearLava >= 4 && Math.random() < 0.005) {
+                grid[y][x] = { ...materials.lava };
+            }
+        }
+        
+        function updateOil(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            moveLiquid(x, y);
+            
+            // El aceite es inflamable
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && (neighbor.type === 'fire' || neighbor.type === 'lava') && 
+                            Math.random() < 0.2) {
+                            grid[y][x] = { ...materials.fire, life: 90 };
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updateDirt(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            movePowder(x, y);
+            
+            // La tierra absorbe agua
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && neighbor.type === 'water' && Math.random() < 0.08) {
+                            grid[ny][nx] = { ...materials.dirt, wet: true, color: '#3d2817' };
+                        }
+                    }
+                }
+            }
+            
+            // Tierra mojada se seca lentamente
+            if (particle.wet && Math.random() < 0.001) {
+                particle.wet = false;
+                particle.color = '#5c4033';
+            }
+        }
+        
+        function updateMethane(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            particle.life = (particle.life || 200) - 1;
+            
+            if (particle.life <= 0) {
+                grid[y][x] = null;
+                return;
+            }
+            
+            // El metano sube rápido
+            if (y > 1 && !grid[y - 2][x] && Math.random() < 0.95) {
+                grid[y - 2][x] = particle;
+                grid[y][x] = null;
+                return;
+            } else if (y > 0 && !grid[y - 1][x] && Math.random() < 0.9) {
+                grid[y - 1][x] = particle;
+                grid[y][x] = null;
+                return;
+            }
+            
+            // El metano es explosivo con fuego/lava
+            for (let dy = -2; dy <= 2; dy++) {
+                for (let dx = -2; dx <= 2; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && (neighbor.type === 'fire' || neighbor.type === 'lava' || 
+                                       neighbor.type === 'plasma') && Math.random() < 0.3) {
+                            explode(x, y, 18);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updateHelium(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            particle.life = (particle.life || 300) - 1;
+            
+            if (particle.life <= 0) {
+                grid[y][x] = null;
+                return;
+            }
+            
+            // El helio sube MUY rápido
+            if (y > 2 && !grid[y - 3][x] && Math.random() < 0.98) {
+                grid[y - 3][x] = particle;
+                grid[y][x] = null;
+                return;
+            } else if (y > 1 && !grid[y - 2][x] && Math.random() < 0.95) {
+                grid[y - 2][x] = particle;
+                grid[y][x] = null;
+                return;
+            } else if (y > 0 && !grid[y - 1][x] && Math.random() < 0.9) {
+                grid[y - 1][x] = particle;
+                grid[y][x] = null;
+                return;
+            }
+        }
+        
+        function updatePlasma(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            particle.life = (particle.life || 80) - 1;
+            
+            // Efecto de color pulsante
+            const pulse = Math.sin(Date.now() / 100) * 0.5 + 0.5;
+            particle.color = `rgb(${Math.floor(255 * pulse)}, 0, ${Math.floor(255 * (1-pulse))})`;
+            
+            if (particle.life <= 0) {
+                grid[y][x] = { ...materials.fire, life: 40 };
+                return;
+            }
+            
+            // El plasma sube pero caóticamente
+            if (y > 0 && Math.random() < 0.8) {
+                const drift = Math.floor(Math.random() * 3) - 1;
+                const nx = x + drift;
+                if (nx >= 0 && nx < width && !grid[y - 1][nx]) {
+                    grid[y - 1][nx] = particle;
+                    grid[y][x] = null;
+                    return;
+                }
+            }
+            
+            // Plasma quema TODO instantáneamente
+            for (let dy = -2; dy <= 2; dy++) {
+                for (let dx = -2; dx <= 2; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height && Math.random() < 0.3) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && neighbor.type !== 'plasma' && neighbor.type !== 'obsidian' && 
+                            neighbor.type !== 'concrete' && neighbor.type !== 'uranium') {
+                            if (neighbor.type === 'water') {
+                                grid[ny][nx] = { ...materials.steam, life: 150 };
+                            } else if (neighbor.type === 'ice') {
+                                grid[ny][nx] = { ...materials.steam, life: 120 };
+                            } else if (neighbor.type === 'metal') {
+                                grid[ny][nx] = { ...materials.lava };
+                            } else {
+                                grid[ny][nx] = { ...materials.fire, life: 100 };
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updateUranium(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            // Efecto de brillo radioactivo
+            const pulse = Math.sin(Date.now() / 300) * 0.3 + 0.7;
+            particle.color = `rgb(0, ${Math.floor(255 * pulse)}, 0)`;
+            
+            // El uranio emite neutrones ocasionalmente
+            if (Math.random() < 0.005) {
+                const dirs = [[-1,-1], [0,-1], [1,-1], [-1,0], [1,0], [-1,1], [0,1], [1,1]];
+                const dir = dirs[Math.floor(Math.random() * dirs.length)];
+                const nx = x + dir[0];
+                const ny = y + dir[1];
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height && !grid[ny][nx]) {
+                    grid[ny][nx] = { ...materials.neutron, life: 100, vx: dir[0] * 2, vy: dir[1] * 2 };
+                }
+            }
+            
+            // Reacción en cadena con otros uranios
+            let uraniumCount = 0;
+            for (let dy = -2; dy <= 2; dy++) {
+                for (let dx = -2; dx <= 2; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && neighbor.type === 'uranium') {
+                            uraniumCount++;
+                        }
+                        if (neighbor && neighbor.type === 'neutron' && Math.random() < 0.1) {
+                            // Fisión nuclear!
+                            explode(x, y, 25);
+                            // Crear plasma
+                            for (let i = 0; i < 20; i++) {
+                                const angle = Math.random() * Math.PI * 2;
+                                const dist = Math.floor(Math.random() * 15) + 5;
+                                const fx = Math.round(x + Math.cos(angle) * dist);
+                                const fy = Math.round(y + Math.sin(angle) * dist);
+                                if (fx >= 0 && fx < width && fy >= 0 && fy < height) {
+                                    grid[fy][fx] = { ...materials.plasma, life: 100 };
+                                }
+                            }
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            // Masa crítica
+            if (uraniumCount > 8 && Math.random() < 0.001) {
+                explode(x, y, 30);
+                for (let i = 0; i < 30; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = Math.floor(Math.random() * 20) + 5;
+                    const fx = Math.round(x + Math.cos(angle) * dist);
+                    const fy = Math.round(y + Math.sin(angle) * dist);
+                    if (fx >= 0 && fx < width && fy >= 0 && fy < height) {
+                        grid[fy][fx] = { ...materials.plasma, life: 120 };
+                    }
+                }
+            }
+        }
+        
+        function updateNeutron(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            particle.life = (particle.life || 100) - 1;
+            
+            if (particle.life <= 0) {
+                grid[y][x] = null;
+                return;
+            }
+            
+            // Los neutrones se mueven en línea recta
+            const vx = particle.vx || 0;
+            const vy = particle.vy || 0;
+            const nx = x + Math.sign(vx);
+            const ny = y + Math.sign(vy);
+            
+            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                if (!grid[ny][nx]) {
+                    grid[ny][nx] = particle;
+                    grid[y][x] = null;
+                } else {
+                    // Colisión
+                    grid[y][x] = null;
+                }
+            } else {
+                grid[y][x] = null;
+            }
+        }
+        
+        function updateElectricity(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            particle.life = (particle.life || 20) - 1;
+            
+            if (particle.life <= 0) {
+                grid[y][x] = null;
+                return;
+            }
+            
+            // La electricidad viaja por materiales conductores
+            let conducted = false;
+            const dirs = [[-1,0], [1,0], [0,-1], [0,1]];
+            
+            for (const dir of dirs) {
+                const nx = x + dir[0];
+                const ny = y + dir[1];
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                    const neighbor = grid[ny][nx];
+                    if (neighbor && neighbor.conductive && Math.random() < 0.8) {
+                        if (Math.random() < 0.1) {
+                            grid[ny][nx] = { ...materials.electricity, life: 20 };
+                            conducted = true;
+                        }
+                    } else if (neighbor && neighbor.type === 'water' && Math.random() < 0.4) {
+                        grid[ny][nx] = { ...materials.steam, life: 80 };
+                    } else if (neighbor && (neighbor.type === 'oil' || neighbor.type === 'petroleum' || 
+                              neighbor.type === 'wood') && Math.random() < 0.3) {
+                        grid[ny][nx] = { ...materials.fire, life: 80 };
+                    } else if (neighbor && neighbor.type === 'gunpowder' && Math.random() < 0.5) {
+                        explode(nx, ny, 12);
+                    }
+                }
+            }
+            
+            // La electricidad se propaga aleatoriamente
+            if (!conducted && Math.random() < 0.6) {
+                const dir = dirs[Math.floor(Math.random() * dirs.length)];
+                const nx = x + dir[0];
+                const ny = y + dir[1];
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height && !grid[ny][nx]) {
+                    grid[ny][nx] = { ...materials.electricity, life: particle.life - 5 };
+                }
+            }
+        }
+        
+        function updateAntimatter(x, y) {
+            const particle = grid[y][x];
+            if (!particle) return;
+            
+            movePowder(x, y);
+            
+            // Efecto visual pulsante
+            const pulse = Math.sin(Date.now() / 150) * 0.5 + 0.5;
+            particle.color = `rgb(${Math.floor(148 * pulse)}, 0, ${Math.floor(211 * pulse)})`;
+            
+            // La antimateria aniquila TODO lo que toca
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const neighbor = grid[ny][nx];
+                        if (neighbor && neighbor.type !== 'antimatter') {
+                            // ANIQUILACIÓN MASIVA
+                            grid[ny][nx] = null;
+                            grid[y][x] = null;
+                            
+                            // Crear explosión de plasma y energía
+                            for (let i = 0; i < 15; i++) {
+                                const angle = (Math.PI * 2 * i) / 15;
+                                const dist = Math.floor(Math.random() * 8) + 3;
+                                const fx = Math.round(x + Math.cos(angle) * dist);
+                                const fy = Math.round(y + Math.sin(angle) * dist);
+                                if (fx >= 0 && fx < width && fy >= 0 && fy < height) {
+                                    if (Math.random() < 0.6) {
+                                        grid[fy][fx] = { ...materials.plasma, life: 100 };
+                                    } else {
+                                        grid[fy][fx] = { ...materials.electricity, life: 25 };
+                                    }
+                                }
+                            }
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Sistema de dibujo
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            drawParticles(e);
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDrawing) drawParticles(e);
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            isDrawing = false;
+        });
+        
+        function drawParticles(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) * (width / rect.width));
+            const y = Math.floor((e.clientY - rect.top) * (height / rect.height));
+            
+            for (let dy = -brushSize; dy <= brushSize; dy++) {
+                for (let dx = -brushSize; dx <= brushSize; dx++) {
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist <= brushSize) {
+                        const px = x + dx;
+                        const py = y + dy;
+                        if (px >= 0 && px < width && py >= 0 && py < height && !grid[py][px]) {
+                            grid[py][px] = { ...materials[selectedMaterial] };
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Loop principal
+        function update() {
+            if (!isPaused) {
+                // Actualizar de abajo hacia arriba, derecha a izquierda aleatoriamente
+                const startX = Math.random() < 0.5 ? 0 : width - 1;
+                const endX = startX === 0 ? width : -1;
+                const stepX = startX === 0 ? 1 : -1;
+                
+                for (let y = height - 1; y >= 0; y--) {
+                    for (let x = startX; x !== endX; x += stepX) {
+                        const particle = grid[y][x];
+                        if (particle && particle.update) {
+                            particle.update(x, y);
+                        }
+                    }
+                }
+            }
+            
+            render();
+            requestAnimationFrame(update);
+        }
+        
+        function render() {
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, width, height);
+            
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const particle = grid[y][x];
+                    if (particle) {
+                        ctx.fillStyle = particle.color;
+                        ctx.fillRect(x, y, 1, 1);
+                    }
+                }
+            }
+        }
+        
+        initUI();
+        update();
+    </script>
+</body>
+</html>
