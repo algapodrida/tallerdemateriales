@@ -22,59 +22,98 @@
         .container { display:flex; flex:1; gap:1rem; padding:1rem; position:relative; z-index:1; overflow:hidden; }
         .sidebar { background:var(--bg-panel); border:2px solid var(--accent-cyan); border-radius:12px; padding:0.8rem; width:268px; flex-shrink:0; box-shadow:0 8px 32px rgba(0,255,242,0.15); overflow-y:auto; max-height:calc(100vh - 100px); display:flex; flex-direction:column; gap:0.5rem; }
         .sidebar::-webkit-scrollbar{width:5px} .sidebar::-webkit-scrollbar-track{background:var(--bg-dark);border-radius:4px} .sidebar::-webkit-scrollbar-thumb{background:var(--accent-cyan);border-radius:4px}
-        .mat-section-title { grid-column:1/-1; font-family:'Orbitron',sans-serif; font-size:0.55rem; font-weight:700; color:var(--accent-cyan); text-transform:uppercase; letter-spacing:2px; padding:5px 2px 3px; border-bottom:1px solid rgba(0,255,242,0.25); margin-top:3px; }
-        .eraser-btn { background:linear-gradient(135deg,#1a0f0a,#2a1510); border:2px solid #ff6b35; border-radius:8px; padding:0.45rem 0.6rem; cursor:pointer; transition:all 0.3s ease; font-family:'JetBrains Mono',monospace; font-weight:600; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.5px; color:#ff6b35; width:100%; display:flex; align-items:center; justify-content:center; gap:0.4rem; }
+
+        /* Controles superiores compactos */
+        .top-controls { display:flex; flex-direction:column; gap:0.3rem; }
+        .top-controls-row { display:grid; grid-template-columns:1fr 1fr; gap:0.3rem; }
+        .eraser-btn { background:linear-gradient(135deg,#1a0f0a,#2a1510); border:2px solid #ff6b35; border-radius:8px; padding:0.45rem 0.6rem; cursor:pointer; transition:all 0.3s ease; font-family:'JetBrains Mono',monospace; font-weight:600; font-size:0.62rem; text-transform:uppercase; letter-spacing:0.5px; color:#ff6b35; width:100%; display:flex; align-items:center; justify-content:center; gap:0.4rem; }
         .eraser-btn:hover{box-shadow:0 4px 15px rgba(255,107,53,0.4);transform:translateY(-1px)}
         .eraser-btn.active{box-shadow:0 0 20px rgba(255,107,53,0.5),inset 0 0 20px rgba(255,107,53,0.1);animation:eraserPulse 2s ease-in-out infinite;color:#fff}
         @keyframes eraserPulse{0%,100%{box-shadow:0 0 20px rgba(255,107,53,0.5),inset 0 0 20px rgba(255,107,53,0.1)}50%{box-shadow:0 0 30px rgba(255,107,53,0.8),inset 0 0 30px rgba(255,107,53,0.2)}}
+
+        .btn-sm { background:linear-gradient(135deg,var(--bg-dark),#1a1f2e); border:1.5px solid rgba(0,255,242,0.4); color:var(--text-primary); padding:0.4rem 0.5rem; border-radius:6px; cursor:pointer; font-family:'JetBrains Mono',monospace; font-weight:600; font-size:0.58rem; text-transform:uppercase; transition:all 0.25s ease; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:0.3rem; }
+        .btn-sm:hover{box-shadow:0 3px 10px rgba(0,255,242,0.3);transform:translateY(-1px);border-color:var(--accent-cyan);}
+        .btn-sm.pause-active{border-color:var(--accent-magenta);color:var(--accent-magenta);}
+
+        /* Slider de pincel inline */
+        .brush-row { display:flex; align-items:center; gap:0.5rem; background:rgba(19,25,32,0.8); border:1px solid rgba(0,255,242,0.2); border-radius:6px; padding:0.4rem 0.6rem; }
+        .brush-label { font-size:0.56rem; color:var(--text-secondary); text-transform:uppercase; white-space:nowrap; }
+        .brush-val { font-size:0.6rem; color:var(--accent-cyan); font-weight:600; white-space:nowrap; min-width:20px; text-align:right; }
+        .brush-row input[type="range"]{ flex:1; height:4px; border-radius:3px; background:linear-gradient(90deg,var(--accent-cyan),var(--accent-magenta)); outline:none; -webkit-appearance:none; }
+        .brush-row input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent-yellow);cursor:pointer;border:2px solid var(--bg-dark);box-shadow:0 0 6px rgba(255,235,59,0.6)}
+
+        /* Speed controls */
+        .speed-row { display:grid; grid-template-columns:repeat(4,1fr); gap:0.25rem; }
+        .speed-btn { background:linear-gradient(135deg,var(--bg-dark),#1a1f2e); border:1.5px solid rgba(255,255,255,0.1); border-radius:5px; padding:0.3rem 0.1rem; cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:0.58rem; font-weight:600; color:var(--text-secondary); text-align:center; transition:all 0.2s ease; }
+        .speed-btn:hover{border-color:rgba(0,255,242,0.4);color:var(--text-primary);}
+        .speed-btn.active{border-color:var(--accent-yellow);color:var(--accent-yellow);box-shadow:0 0 8px rgba(255,235,59,0.3);}
+
+        .mat-section-title { grid-column:1/-1; font-family:'Orbitron',sans-serif; font-size:0.55rem; font-weight:700; color:var(--accent-cyan); text-transform:uppercase; letter-spacing:2px; padding:5px 2px 3px; border-bottom:1px solid rgba(0,255,242,0.25); margin-top:3px; }
         .material-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.3rem; }
         .material-btn { background:linear-gradient(135deg,var(--bg-dark),#1a1f2e); border:1.5px solid rgba(255,255,255,0.08); border-radius:6px; padding:0.3rem 0.15rem; cursor:pointer; transition:all 0.25s ease; font-family:'JetBrains Mono',monospace; font-weight:600; font-size:0.55rem; text-transform:uppercase; letter-spacing:0.3px; color:var(--text-primary); text-align:center; }
         .material-btn:hover{transform:translateY(-1px);border-color:rgba(0,255,242,0.4);box-shadow:0 3px 10px rgba(0,255,242,0.2)}
         .material-btn.active{border-color:var(--accent-cyan);box-shadow:0 0 12px var(--border-glow),inset 0 0 12px rgba(0,255,242,0.08);animation:activePulse 2s ease-in-out infinite}
         @keyframes activePulse{0%,100%{box-shadow:0 0 12px var(--border-glow),inset 0 0 12px rgba(0,255,242,0.08)}50%{box-shadow:0 0 20px rgba(0,255,242,0.5),inset 0 0 20px rgba(0,255,242,0.15)}}
         .material-color{width:18px;height:18px;border-radius:4px;margin:0 auto 0.2rem;border:1.5px solid rgba(255,255,255,0.15);box-shadow:0 1px 4px rgba(0,0,0,0.4)}
-        .controls{background:rgba(19,25,32,0.8);border:1px solid var(--accent-cyan);border-radius:8px;padding:0.7rem}
-        .control-label{font-size:0.62rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.4rem;display:block}
-        .btn-control{background:linear-gradient(135deg,var(--bg-dark),#1a1f2e);border:2px solid var(--accent-magenta);color:var(--text-primary);padding:0.45rem 1rem;border-radius:6px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:0.72rem;text-transform:uppercase;width:100%;margin-top:0.4rem;transition:all 0.3s ease;letter-spacing:1px}
-        .btn-control:hover{box-shadow:0 4px 15px rgba(255,0,170,0.4);transform:translateY(-1px)}
-        .slider-container{margin-top:0.5rem}
-        input[type="range"]{width:100%;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-magenta));outline:none;-webkit-appearance:none}
-        input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent-yellow);cursor:pointer;border:2px solid var(--bg-dark);box-shadow:0 0 8px rgba(255,235,59,0.6)}
+        .section-title{font-family:'Orbitron',sans-serif;font-size:0.72rem;font-weight:700;color:var(--accent-cyan);text-transform:uppercase;letter-spacing:2px;margin-bottom:0.5rem;padding-bottom:0.4rem;border-bottom:1px solid rgba(0,255,242,0.3)}
+        .info-text{font-size:0.58rem;color:var(--text-secondary);margin-top:0.4rem;line-height:1.6}
         .canvas-container{flex:1;display:flex;justify-content:center;align-items:center}
         canvas{border:3px solid var(--accent-cyan);border-radius:12px;box-shadow:0 0 40px rgba(0,255,242,0.4),0 0 80px rgba(255,0,170,0.2);cursor:crosshair;background:#000;animation:canvasGlow 4s ease-in-out infinite}
         @keyframes canvasGlow{0%,100%{box-shadow:0 0 40px rgba(0,255,242,0.4),0 0 80px rgba(255,0,170,0.2)}50%{box-shadow:0 0 60px rgba(0,255,242,0.6),0 0 100px rgba(255,0,170,0.3)}}
-        .info-text{font-size:0.6rem;color:var(--text-secondary);margin-top:0.5rem;line-height:1.5}
-        .section-title{font-family:'Orbitron',sans-serif;font-size:0.72rem;font-weight:700;color:var(--accent-cyan);text-transform:uppercase;letter-spacing:2px;margin-bottom:0.5rem;padding-bottom:0.4rem;border-bottom:1px solid rgba(0,255,242,0.3)}
+        .controls-sep { border:none; border-top:1px solid rgba(0,255,242,0.15); margin:0.1rem 0; }
     </style>
 </head>
 <body>
 <header><h1>⚛ Sandbox Elemental ⚛</h1></header>
 <div class="container">
     <aside class="sidebar">
-        <div class="section-title">Materiales</div>
-        <button class="eraser-btn" id="eraserBtn">🧹 Borrar (Goma)</button>
-        <div class="material-grid" id="materialGrid"></div>
-        <div class="controls">
-            <div class="section-title">Controles</div>
-            <label class="control-label">Tamaño del Pincel</label>
-            <div class="slider-container">
+
+        <!-- CONTROLES SUPERIORES -->
+        <div class="section-title">Controles</div>
+        <div class="top-controls">
+            <button class="eraser-btn" id="eraserBtn">🧹 Goma de Borrar</button>
+            <div class="top-controls-row">
+                <button class="btn-sm" id="clearBtn">🗑️ Limpiar</button>
+                <button class="btn-sm" id="pauseBtn">⏸️ Pausar</button>
+            </div>
+            <div class="brush-row">
+                <span class="brush-label">Pincel</span>
                 <input type="range" id="brushSize" min="1" max="20" value="5">
-                <div class="info-text">Tamaño: <span id="brushValue">5</span>px</div>
+                <span class="brush-val" id="brushValue">5</span>
             </div>
-            <button class="btn-control" id="clearBtn">🗑️ Limpiar Todo</button>
-            <button class="btn-control" id="pauseBtn">⏸️ Pausar</button>
-            <div class="info-text" style="margin-top:0.8rem">
-                💡 Click y arrastra para dibujar<br>
-                ⚡ Metales → conducen electricidad<br>
-                🔵 Condensador: vapor→agua<br>
-                🔴 PiedraFuego: agua→vapor<br>
-                🧤 Goma: aísla la electricidad<br>
-                💡 Bombilla: se ilumina con corriente<br>
-                🚪 Puerta: se expande con corriente<br>
-                🌿 Planta: necesita agua para crecer<br>
-                🌵 Sin agua mucho tiempo → se seca<br>
-                🔪 Cosechadora: rebota y borra todo
+            <!-- Velocidad -->
+            <div style="display:flex;align-items:center;gap:0.4rem;margin-top:0.1rem;">
+                <span style="font-size:0.56rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;">Velocidad</span>
             </div>
+            <div class="speed-row">
+                <button class="speed-btn" data-speed="0.25">0.25×</button>
+                <button class="speed-btn" data-speed="0.5">0.5×</button>
+                <button class="speed-btn active" data-speed="1">1×</button>
+                <button class="speed-btn" data-speed="2">2×</button>
+            </div>
+        </div>
+
+        <hr class="controls-sep">
+
+        <!-- MATERIALES -->
+        <div class="section-title" style="margin-top:0.3rem;">Materiales</div>
+        <div class="material-grid" id="materialGrid"></div>
+
+        <div class="info-text">
+            💡 Click y arrastra para dibujar<br>
+            ⚡ Metales → conducen electricidad<br>
+            🔵 Condensador: vapor→agua<br>
+            🔴 PiedraFuego: agua→vapor<br>
+            🧤 Goma: aísla la electricidad<br>
+            💡 Bombilla: brilla con corriente<br>
+            🚪 Puerta: se expande con corriente<br>
+            🌿 Planta: necesita agua<br>
+            🌵 Sin agua → se seca<br>
+            🔪 Cosechadora: rebota y borra<br>
+            🧲 Imán: atrae metales<br>
+            ❄️ Cryo: enfría y congela<br>
+            💎 Diamante: indestructible<br>
+            🌊 Esponja: absorbe líquidos
         </div>
     </aside>
     <div class="canvas-container">
@@ -95,6 +134,9 @@ let isErasing = false;
 let brushSize = 5;
 let isDrawing = false;
 let isPaused = false;
+let simSpeed = 1;
+let frameCount = 0;
+let accumulator = 0;
 
 const MATERIAL_ORDER = [
     '__Básicos',
@@ -103,6 +145,7 @@ const MATERIAL_ORDER = [
     'condenser','firestone',
     'rubber','bulb','door','harvester',
     'electricity','metal','copper','silver','gold',
+    'magnet','sponge','cryo','diamond',
     'obsidian','portal',
     '__Fuego & Calor',
     'fire','lava','magma','plasma',
@@ -116,9 +159,11 @@ const MATERIAL_ORDER = [
     '__Explosivos',
     'explosive','tnt','gunpowder','neutron',
     '__Biología',
-    'plant','seed','ice',
+    'plant','seed','ice','fungus','coral',
     '__Química',
-    'acid',
+    'acid','slime','glue',
+    '__Astro',
+    'void','stardust','darkMatter',
 ];
 
 const MATERIALS = {
@@ -138,6 +183,10 @@ const MATERIALS = {
     rubber:     { name:'Goma',       color:'#333333', density:1.2,type:'solid', insulator:true },
     bulb:       { name:'Bombilla',   color:'#998855', density:1,  type:'solid' },
     door:       { name:'Puerta',     color:'#7a4010', density:3,  type:'solid' },
+    magnet:     { name:'Imán',       color:'#cc4444', density:5,  type:'solid' },
+    sponge:     { name:'Esponja',    color:'#d4a84b', density:0.4,type:'solid' },
+    cryo:       { name:'Cryo',       color:'#aaddff', density:2,  type:'solid', cold:true },
+    diamond:    { name:'Diamante',   color:'#b9f2ff', density:3.5,type:'solid', indestructible:true },
     electricity: { name:'Electr.',   color:'#ffff00', density:0,  type:'energy', life:15 },
     metal:       { name:'Metal',     color:'#b8b8b8', density:7,  type:'solid', conductive:true },
     copper:      { name:'Cobre',     color:'#b87333', density:8.96,type:'solid',conductive:true },
@@ -176,7 +225,14 @@ const MATERIALS = {
     plant: { name:'Planta',  color:'#32cd32', density:0.8, type:'solid'  },
     seed:  { name:'Semilla', color:'#a0522d', density:1.2, type:'powder' },
     ice:   { name:'Hielo',   color:'#87ceeb', density:0.9, type:'solid'  },
-    acid: { name:'Ácido', color:'#adff2f', density:1.2, type:'liquid' },
+    fungus:{ name:'Hongo',   color:'#cc88ff', density:0.6, type:'solid'  },
+    coral: { name:'Coral',   color:'#ff7f7f', density:1.5, type:'solid'  },
+    acid:  { name:'Ácido',   color:'#adff2f', density:1.2, type:'liquid' },
+    slime: { name:'Slime',   color:'#44ff88', density:1.1, type:'liquid' },
+    glue:  { name:'Pegamento',color:'#ffcc88',density:1.4, type:'liquid' },
+    void:      { name:'Vacío',     color:'#000000', density:0,   type:'special' },
+    stardust:  { name:'Polvo★',   color:'#ffaaff', density:0.1, type:'powder' },
+    darkMatter:{ name:'Mat.Oscura',color:'#220033', density:50,  type:'solid'  },
 };
 
 // ─── UI ─────────────────────────────────────────────────────────────────────
@@ -216,7 +272,16 @@ function initUI() {
     document.getElementById('pauseBtn').onclick = function () {
         isPaused = !isPaused;
         this.textContent = isPaused ? '▶️ Reanudar' : '⏸️ Pausar';
+        this.classList.toggle('pause-active', isPaused);
     };
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+        btn.onclick = () => {
+            simSpeed = parseFloat(btn.dataset.speed);
+            accumulator = 0;
+            document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        };
+    });
 }
 
 function selectMaterial(key) {
@@ -239,9 +304,12 @@ function movePowder(x, y) {
 }
 function moveLiquid(x, y) {
     const p=grid[y][x]; if(!p)return;
+    // Glue moves very slowly
+    if(p.type==='glue'&&Math.random()<0.85) return;
     if(y<height-1&&!grid[y+1][x]){grid[y+1][x]=p;grid[y][x]=null;return;}
     const d=Math.random()<0.5?-1:1;
-    for(let i=1;i<=3;i++){if(x+d*i>=0&&x+d*i<width&&!grid[y][x+d*i]){grid[y][x+d*i]=p;grid[y][x]=null;return;}}
+    const spread = p.type==='slime'?2:3;
+    for(let i=1;i<=spread;i++){if(x+d*i>=0&&x+d*i<width&&!grid[y][x+d*i]){grid[y][x+d*i]=p;grid[y][x]=null;return;}}
 }
 function moveGas(x, y, speed=0.8) {
     const p=grid[y][x]; if(!p)return;
@@ -250,7 +318,11 @@ function moveGas(x, y, speed=0.8) {
 function explode(x, y, radius) {
     for(let dy=-radius;dy<=radius;dy+=2) for(let dx=-radius;dx<=radius;dx+=2){
         const dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist<=radius){const nx=x+dx,ny=y+dy;if(nx>=0&&nx<width&&ny>=0&&ny<height&&Math.random()<(1-dist/radius)*0.8)grid[ny][nx]=dist<radius*0.4?{type:'plasma',life:60}:{type:'fire',life:50};}
+        if(dist<=radius){const nx=x+dx,ny=y+dy;if(nx>=0&&nx<width&&ny>=0&&ny<height&&Math.random()<(1-dist/radius)*0.8){
+            const t=grid[ny][nx];
+            if(t&&t.type==='diamond') continue; // diamond is indestructible
+            grid[ny][nx]=dist<radius*0.4?{type:'plasma',life:60}:{type:'fire',life:50};
+        }}
     }
 }
 function propagateHeat(x,y,ht,r,prob,to) {
@@ -269,42 +341,45 @@ function isConductive(p) {
     return mat && mat.conductive;
 }
 
-// Ejecutar UNA VEZ por frame: encuentra todas las fuentes de electricidad
-// y hace flood fill por toda la red conectada instantáneamente
 function runElectricalSimulation() {
-    // Paso 1: decrementar timers y limpiar estado anterior
+    // Paso 1: decrementar timers y apagar cuando no hay corriente
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             const p = grid[y][x]; if (!p) continue;
             if (p.electrified) {
                 p.electrifiedTimer = (p.electrifiedTimer || 0) - 1;
-                if (p.electrifiedTimer <= 0) { p.electrified = false; p.electrifiedTimer = 0; }
+                if (p.electrifiedTimer <= 0) {
+                    p.electrified = false;
+                    p.electrifiedTimer = 0;
+                }
             }
-            if (p.type === 'bulb' && p.lit) {
-                p.litTimer = (p.litTimer || 0) - 1;
-                if (p.litTimer <= 0) { p.lit = false; p.litTimer = 0; }
+            if (p.type === 'bulb') {
+                if (p.lit) {
+                    p.litTimer = (p.litTimer || 0) - 1;
+                    if (p.litTimer <= 0) { p.lit = false; p.litTimer = 0; }
+                }
             }
-            if (p.type === 'door' && p.powered) {
-                p.poweredTimer = (p.poweredTimer || 0) - 1;
-                if (p.poweredTimer <= 0) { p.powered = false; p.poweredTimer = 0; }
+            if (p.type === 'door') {
+                if (p.powered) {
+                    p.poweredTimer = (p.poweredTimer || 0) - 1;
+                    if (p.poweredTimer <= 0) { p.powered = false; p.poweredTimer = 0; }
+                }
             }
         }
     }
 
-    // Paso 2: flood fill desde cada fuente de electricidad activa
+    // Paso 2: flood fill desde fuentes activas
     const visited = new Set();
 
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             const p = grid[y][x];
-            // Fuentes: partículas de electricidad O conductores ya electrificados
             if (!p) continue;
             const isSource = (p.type === 'electricity') ||
                              (isConductive(p) && p.electrified && p.electrifiedTimer > 0);
             if (!isSource) continue;
             if (visited.has(y * width + x)) continue;
 
-            // BFS desde esta fuente
             const queue = [[x, y]];
             visited.add(y * width + x);
 
@@ -320,28 +395,30 @@ function runElectricalSimulation() {
                         if (visited.has(idx)) continue;
                         const nb = grid[ny][nx];
                         if (!nb) continue;
-                        if (nb.type === 'rubber') continue; // aislante: bloquea
+                        if (nb.type === 'rubber') continue;
 
                         visited.add(idx);
 
                         if (isConductive(nb)) {
                             nb.electrified = true;
                             nb.electrifiedTimer = 12;
-                            queue.push([nx, ny]); // conductor: sigue propagando
+                            queue.push([nx, ny]);
                         } else if (nb.type === 'bulb') {
                             nb.lit = true;
                             nb.litTimer = 12;
-                            queue.push([nx, ny]); // bombilla: también propaga a vecinos
+                            queue.push([nx, ny]);
                         } else if (nb.type === 'door') {
                             nb.powered = true;
                             nb.poweredTimer = 12;
-                            queue.push([nx, ny]); // puerta: también propaga
+                            queue.push([nx, ny]);
                         } else if (nb.type === 'water' && Math.random() < 0.25) {
                             nb.electrified = true;
                             nb.electrifiedTimer = 4;
-                            // agua: termina aquí
                         } else if (nb.type === 'explosive' || nb.type === 'tnt') {
                             if (Math.random() < 0.5) explode(nx, ny, nb.type === 'tnt' ? 20 : 15);
+                        } else if (nb.type === 'magnet') {
+                            nb.powered = true; nb.poweredTimer = 12;
+                            queue.push([nx, ny]);
                         }
                     }
                 }
@@ -350,27 +427,98 @@ function runElectricalSimulation() {
     }
 }
 
-// ─── PUERTA ─────────────────────────────────────────────────────────────────
+// ─── PUERTA (se expande mucho más) ──────────────────────────────────────────
+const DOOR_EXPAND = 6; // expande 6 celdas a cada lado
+
 function updateDoor(x, y) {
-    const p = grid[y][x]; if (!p || p.type!=='door') return;
+    const p = grid[y][x]; if (!p || p.type !== 'door') return;
     const on = p.powered && p.poweredTimer > 0;
-    if (on && !p.expanded) {
+    if (on && !p.expanded && !p.isExt) {
         for (const ddx of [-1, 1]) {
-            const nx = x+ddx;
-            if (nx>=0 && nx<width && !grid[y][nx]) {
-                grid[y][nx] = {type:'door', expanded:true, isExt:true};
-                p.expanded = true;
+            for (let step = 1; step <= DOOR_EXPAND; step++) {
+                const nx = x + ddx * step;
+                if (nx >= 0 && nx < width && !grid[y][nx]) {
+                    grid[y][nx] = { type: 'door', expanded: true, isExt: true, parentX: x };
+                } else break;
             }
         }
+        p.expanded = true;
     } else if (!on && p.expanded && !p.isExt) {
-        for (let ddx=-3; ddx<=3; ddx++) {
-            const nx=x+ddx;
-            if (nx>=0&&nx<width&&nx!==x) {
-                const nb=grid[y][nx];
-                if (nb&&nb.type==='door'&&nb.isExt) grid[y][nx]=null;
+        // Eliminar extensiones hasta DOOR_EXPAND*2+2 a cada lado
+        for (let ddx = -(DOOR_EXPAND+2); ddx <= (DOOR_EXPAND+2); ddx++) {
+            const nx = x + ddx;
+            if (nx >= 0 && nx < width && nx !== x) {
+                const nb = grid[y][nx];
+                if (nb && nb.type === 'door' && nb.isExt) grid[y][nx] = null;
             }
         }
-        p.expanded=false;
+        p.expanded = false;
+    }
+}
+
+// ─── IMÁN ───────────────────────────────────────────────────────────────────
+function updateMagnet(x, y) {
+    const p = grid[y][x];
+    if (!p || p.type !== 'magnet') return;
+    const powered = p.powered && p.poweredTimer > 0;
+    if (!powered) return;
+    const radius = 8;
+    for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+            if (!dx && !dy) continue;
+            const nx = x+dx, ny = y+dy;
+            if (nx<0||nx>=width||ny<0||ny>=height) continue;
+            const nb = grid[ny][nx];
+            if (!nb) continue;
+            const mat = MATERIALS[nb.type];
+            if (!mat || !mat.conductive) continue;
+            // pull toward magnet
+            const tx = nx + Math.sign(x-nx);
+            const ty = ny + Math.sign(y-ny);
+            if (tx>=0&&tx<width&&ty>=0&&ty<height&&!grid[ty][tx]&&(tx!==x||ty!==y)) {
+                grid[ty][tx] = nb;
+                grid[ny][nx] = null;
+            }
+        }
+    }
+}
+
+// ─── ESPONJA ─────────────────────────────────────────────────────────────────
+function updateSponge(x, y) {
+    const p = grid[y][x];
+    if (!p || p.type !== 'sponge') return;
+    const absorbed = p.absorbed || 0;
+    if (absorbed >= 20) return; // full
+    for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+            if (!dx && !dy) continue;
+            const nx = x+dx, ny = y+dy;
+            if (nx<0||nx>=width||ny<0||ny>=height) continue;
+            const nb = grid[ny][nx];
+            if (nb && (nb.type==='water'||nb.type==='slime') && Math.random()<0.3) {
+                grid[ny][nx] = null;
+                p.absorbed = absorbed + 1;
+                return;
+            }
+        }
+    }
+}
+
+// ─── CRYO ────────────────────────────────────────────────────────────────────
+function updateCryo(x, y) {
+    const p = grid[y][x];
+    if (!p || p.type !== 'cryo') return;
+    for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+            if (!dx && !dy) continue;
+            const nx = x+dx, ny = y+dy;
+            if (nx<0||nx>=width||ny<0||ny>=height) continue;
+            const nb = grid[ny][nx];
+            if (!nb) continue;
+            if (nb.type==='water' && Math.random()<0.15) { grid[ny][nx]={type:'ice'}; }
+            else if (nb.type==='steam' && Math.random()<0.2) { grid[ny][nx]={type:'water'}; }
+            else if ((nb.type==='fire'||nb.type==='lava'||nb.type==='plasma') && Math.random()<0.25) { grid[ny][nx]={type:'water'}; }
+        }
     }
 }
 
@@ -379,6 +527,8 @@ function updateParticle(x, y) {
     const p = grid[y][x]; if (!p) return;
     const type = p.type;
     const mat = MATERIALS[type]; if (!mat) return;
+
+    if (type === 'diamond') return; // indestructible, no update
 
     // Vida
     if (p.life !== undefined) {
@@ -389,14 +539,30 @@ function updateParticle(x, y) {
         }
     }
 
-    // Puerta (la electricidad la maneja runElectricalSimulation globalmente)
     if (type==='door') updateDoor(x, y);
+    if (type==='magnet') updateMagnet(x, y);
+    if (type==='sponge') updateSponge(x, y);
+    if (type==='cryo') updateCryo(x, y);
+
+    // Vacío: absorbe todo alrededor
+    if (type==='void') {
+        for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++) {
+            if(!dx&&!dy) continue;
+            const nx=x+dx,ny=y+dy;
+            if(nx>=0&&nx<width&&ny>=0&&ny<height&&grid[ny][nx]) {
+                const nb=grid[ny][nx];
+                if(nb.type!=='void'&&nb.type!=='diamond'&&nb.type!=='obsidian'&&Math.random()<0.15) grid[ny][nx]=null;
+            }
+        }
+        return;
+    }
 
     // Movimiento
     if (mat.type==='powder') movePowder(x, y);
     else if (mat.type==='liquid') moveLiquid(x, y);
     else if (mat.type==='gas') {
-        const sp = type==='hydrogen'?0.98:type==='helium'?0.99:type==='methane'?0.95:0.8;
+        const sp = type==='hydrogen'?0.98:type==='helium'?0.99:type==='methane'?0.95:
+                   type==='stardust'?0.6:0.8;
         moveGas(x, y, sp);
     } else if (type==='harvester') {
         if(!p.vx) p.vx = 1;
@@ -405,11 +571,15 @@ function updateParticle(x, y) {
             const nx = x + p.vx;
             if(nx<0||nx>=width){ p.vx = -p.vx; break; }
             const target = grid[y][nx];
-            if(target && target.type!=='harvester') grid[y][nx] = null;
+            if(target && target.type!=='harvester'&&target.type!=='diamond') grid[y][nx] = null;
             if(!grid[y][nx]){ grid[y][nx] = p; grid[y][x] = null; break; }
             else { p.vx = -p.vx; break; }
         }
         return;
+    } else if (type==='stardust') {
+        // stardust floats and sparkles, random walk
+        if(Math.random()<0.5) moveGas(x,y,0.5);
+        else movePowder(x,y);
     }
 
     checkReactions(x, y);
@@ -426,6 +596,9 @@ function checkReactions(x, y) {
         if (nx<0||nx>=width||ny<0||ny>=height) continue;
         const nb = grid[ny][nx]; if (!nb) continue;
 
+        // Diamond: indestructible - skip reactions
+        if (nb.type==='diamond') continue;
+
         if (type==='condenser' && nb.type==='steam' && Math.random()<0.3) {
             grid[ny][nx] = {type:'water'}; continue;
         }
@@ -433,6 +606,48 @@ function checkReactions(x, y) {
             grid[ny][nx] = {type:'steam', life:160}; continue;
         }
         if (type==='rubber'||nb.type==='rubber') continue;
+
+        // Slime + acid = neutralization
+        if ((type==='slime'&&nb.type==='acid')||(type==='acid'&&nb.type==='slime')) {
+            if(Math.random()<0.2){grid[y][x]=null;grid[ny][nx]=null;return;}
+        }
+        // Slime + water = spreads slowly (just flavour, absorbed)
+        if (type==='slime'&&nb.type==='water'&&Math.random()<0.05) { grid[ny][nx]={type:'slime'}; }
+
+        // Glue solidifies when touching stone/concrete/brick
+        if (type==='glue'&&(nb.type==='stone'||nb.type==='concrete'||nb.type==='brick')&&Math.random()<0.08) {
+            grid[y][x]={type:'stone'}; return;
+        }
+
+        // Fungus grows on dirt/wood with water nearby
+        if (type==='fungus'&&(nb.type==='dirt'||nb.type==='wood')&&Math.random()<0.005) {
+            grid[ny][nx]={type:'fungus'};
+        }
+        if (type==='fungus'&&(nb.type==='fire'||nb.type==='lava'||nb.type==='plasma')&&Math.random()<0.3){
+            grid[y][x]=null; return;
+        }
+
+        // Coral grows in water
+        if (type==='coral'&&nb.type==='water'&&Math.random()<0.003) {
+            const dirs=[[0,-1],[-1,0],[1,0]];
+            const d=dirs[Math.floor(Math.random()*3)];
+            const cx2=x+d[0],cy2=y+d[1];
+            if(cx2>=0&&cx2<width&&cy2>=0&&cy2<height&&!grid[cy2][cx2])grid[cy2][cx2]={type:'coral'};
+        }
+        if (type==='coral'&&(nb.type==='acid')&&Math.random()<0.2){ grid[y][x]=null; return; }
+
+        // Stardust: magical reactions
+        if (type==='stardust'&&nb.type==='water'&&Math.random()<0.05){
+            grid[ny][nx]={type:'steam',life:200}; grid[y][x]={type:'stardust',life:80}; continue;
+        }
+        if (type==='stardust'&&nb.type==='fire'&&Math.random()<0.1){
+            grid[y][x]={type:'plasma',life:120}; return;
+        }
+
+        // Dark matter: absorbs everything slowly
+        if (type==='darkMatter'&&nb.type!=='darkMatter'&&nb.type!=='diamond'&&Math.random()<0.02){
+            grid[ny][nx]={type:'darkMatter'}; continue;
+        }
 
         if ((type==='sodium'&&nb.type==='water')||(type==='water'&&nb.type==='sodium')) {
             explode(x,y,18);
@@ -464,6 +679,8 @@ function checkReactions(x, y) {
             else if(nb.type==='phosphorus') grid[ny][nx]={type:'fire',life:100};
             else if(nb.type==='oxygen') grid[ny][nx]=null;
             else if(nb.type==='hydrogen'&&Math.random()<0.3){explode(nx,ny,6);grid[ny][nx]={type:'water'};return;}
+            else if(nb.type==='slime'&&Math.random()<0.4) grid[ny][nx]={type:'smoke',life:80};
+            else if(nb.type==='fungus'&&Math.random()<0.4) grid[ny][nx]=null;
         }
 
         if((type==='explosive'||type==='tnt')&&(nb.type==='fire'||nb.type==='lava'||nb.type==='plasma')){explode(x,y,type==='tnt'?20:15);return;}
@@ -519,6 +736,19 @@ function checkReactions(x, y) {
             if(p.growth<5){
                 const dirs=[[0,-1],[-1,0],[1,0]],d=dirs[Math.floor(Math.random()*3)],nx=x+d[0],ny=y+d[1];
                 if(nx>=0&&nx<width&&ny>=0&&ny<height&&!grid[ny][nx])grid[ny][nx]={type:'plant',growth:0,waterTimer:p.waterTimer};
+            }
+        }
+    }
+    if(type==='fungus'){
+        // fungus slowly spreads on organic material
+        if(Math.random()<0.003){
+            const dirs=[[0,-1],[0,1],[-1,0],[1,0]];
+            const d=dirs[Math.floor(Math.random()*4)];
+            const nx=x+d[0],ny=y+d[1];
+            if(nx>=0&&nx<width&&ny>=0&&ny<height){
+                const nb=grid[ny][nx];
+                if(nb&&(nb.type==='dirt'||nb.type==='wood')) grid[ny][nx]={type:'fungus'};
+                else if(!nb) grid[ny][nx]={type:'fungus'};
             }
         }
     }
@@ -578,41 +808,70 @@ function render(){
         else if(p.type==='portal'){const v=Math.sin(t/100)*0.3+0.7;c=`rgb(${139*v|0},0,${255*v|0})`;}
         else if(p.type==='uranium'){const v=Math.sin(t/300)*0.3+0.7;c=`rgb(0,${255*v|0},0)`;}
         else if(p.type==='electricity'){const v=Math.random();c=`rgb(${255*v|0},${255*v|0},0)`;}
-        // Conductor electrificado: pulso azul-blanco en TODO el píxel
         else if(p.electrified&&p.electrifiedTimer>0){const v=Math.sin(t/50)*0.5+0.5;c=`rgb(${100+155*v|0},${150+105*v|0},255)`;}
-        // Bombilla encendida: amarillo-blanco brillante en TODO el píxel
         else if(p.type==='bulb'&&p.lit){const v=Math.sin(t/80)*0.3+0.7;c=`rgb(255,${230+25*v|0},${80*v|0})`;}
         else if(p.type==='bulb'&&!p.lit) c='#555544';
-        // Puerta con corriente: naranja en TODO el píxel
         else if(p.type==='door'&&p.powered&&p.poweredTimer>0){const v=Math.sin(t/100)*0.2+0.8;c=`rgb(${200*v|0},${100*v|0},${20*v|0})`;}
+        else if(p.type==='door'&&!p.powered) c='#5a3008'; // puerta apagada = color oscuro
         else if(p.type==='harvester'){const v=Math.sin(t/80)*0.3+0.7;c=`rgb(255,${100+60*v|0},0)`;}
         else if(p.type==='condenser'){const v=Math.sin(t/800)*0.08+0.92;c=`rgb(${68*v|0},${136*v|0},${180*v|0})`;}
         else if(p.type==='firestone'){const v=Math.sin(t/200)*0.25+0.75;c=`rgb(${210*v|0},${45*v|0},0)`;}
         else if(p.type==='rubber') c='#2a2a2a';
+        else if(p.type==='magnet'){
+            if(p.powered&&p.poweredTimer>0){const v=Math.sin(t/60)*0.5+0.5;c=`rgb(255,${50+100*v|0},${50+50*v|0})`;}
+            else c='#883333';
+        }
+        else if(p.type==='sponge'){
+            const fill=(p.absorbed||0)/20;
+            const r=200-Math.round(fill*60), g=170-Math.round(fill*80), b=70;
+            c=`rgb(${r},${g},${b})`;
+        }
+        else if(p.type==='cryo'){const v=Math.sin(t/400)*0.2+0.8;c=`rgb(${170*v|0},${220*v|0},255)`;}
+        else if(p.type==='diamond'){const v=Math.sin(t/200)*0.3+0.7;c=`rgb(${185+70*v|0},${242+13*v|0},255)`;}
+        else if(p.type==='void') c='#050505';
+        else if(p.type==='stardust'){const v=Math.random()*0.5+0.5;c=`rgb(255,${180*v|0},255)`;}
+        else if(p.type==='darkMatter'){const v=Math.sin(t/800)*0.15+0.15;c=`rgb(${30*v|0},0,${40*v|0})`;}
+        else if(p.type==='slime'){const v=Math.sin(t/300)*0.2+0.8;c=`rgb(${50*v|0},${255*v|0},${100*v|0})`;}
+        else if(p.type==='glue'){const v=Math.sin(t/500)*0.1+0.9;c=`rgb(${255*v|0},${200*v|0},${100*v|0})`;}
+        else if(p.type==='fungus'){const v=Math.sin(t/400)*0.2+0.8;c=`rgb(${180*v|0},${100*v|0},${255*v|0})`;}
+        else if(p.type==='coral'){const v=Math.sin(t/600)*0.2+0.8;c=`rgb(255,${100+27*v|0},${100*v|0})`;}
 
         ctx.fillStyle=c;
         ctx.fillRect(x*pixelSize,y*pixelSize,pixelSize,pixelSize);
     }
 }
 
-// ─── LOOP ────────────────────────────────────────────────────────────────────
-let frameCount=0;
-function update(){
-    if(!isPaused){
-        frameCount++;
-        runElectricalSimulation(); // sistema eléctrico global: una vez por frame
-        const ltr=frameCount%2===0;
-        for(let y=height-1;y>=0;y--){
-            if(ltr){for(let x=0;x<width;x++){if(grid[y][x])updateParticle(x,y);}}
-            else    {for(let x=width-1;x>=0;x--){if(grid[y][x])updateParticle(x,y);}}
+// ─── LOOP con control de velocidad ──────────────────────────────────────────
+let lastTime = 0;
+
+function update(timestamp){
+    const dt = timestamp - lastTime;
+    lastTime = timestamp;
+
+    if (!isPaused) {
+        accumulator += dt * simSpeed;
+        // tick each ~16.7ms of sim time
+        const tickMs = 16.7;
+        while (accumulator >= tickMs) {
+            accumulator -= tickMs;
+            frameCount++;
+            runElectricalSimulation();
+            const ltr = frameCount % 2 === 0;
+            for (let y = height-1; y >= 0; y--) {
+                if (ltr) { for (let x = 0; x < width; x++) { if (grid[y][x]) updateParticle(x, y); } }
+                else     { for (let x = width-1; x >= 0; x--) { if (grid[y][x]) updateParticle(x, y); } }
+            }
+            // Cap at 4 ticks max per frame to avoid spiral of death
+            if (accumulator > tickMs * 4) { accumulator = 0; break; }
         }
     }
+
     render();
     requestAnimationFrame(update);
 }
 
 initUI();
-update();
+requestAnimationFrame(update);
 </script>
 </body>
 </html>
