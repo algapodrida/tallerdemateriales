@@ -342,41 +342,26 @@ function isConductive(p) {
 }
 
 function runElectricalSimulation() {
-    // Paso 1: decrementar timers y apagar cuando no hay corriente
+    // Paso 1: apagar TODO el estado eléctrico antes de recalcular
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             const p = grid[y][x]; if (!p) continue;
-            if (p.electrified) {
-                p.electrifiedTimer = (p.electrifiedTimer || 0) - 1;
-                if (p.electrifiedTimer <= 0) {
-                    p.electrified = false;
-                    p.electrifiedTimer = 0;
-                }
-            }
-            if (p.type === 'bulb') {
-                if (p.lit) {
-                    p.litTimer = (p.litTimer || 0) - 1;
-                    if (p.litTimer <= 0) { p.lit = false; p.litTimer = 0; }
-                }
-            }
-            if (p.type === 'door') {
-                if (p.powered) {
-                    p.poweredTimer = (p.poweredTimer || 0) - 1;
-                    if (p.poweredTimer <= 0) { p.powered = false; p.poweredTimer = 0; }
-                }
-            }
+            p.electrified = false;
+            if (p.type === 'bulb') p.lit = false;
+            if (p.type === 'door') p.powered = false;
+            if (p.type === 'magnet') p.powered = false;
         }
     }
 
-    // Paso 2: flood fill desde fuentes activas
+    // Paso 2: flood fill SOLO desde partículas de electricidad activas
     const visited = new Set();
 
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             const p = grid[y][x];
             if (!p) continue;
-            const isSource = (p.type === 'electricity') ||
-                             (isConductive(p) && p.electrified && p.electrifiedTimer > 0);
+            // ÚNICA fuente válida: partícula de electricidad
+            const isSource = (p.type === 'electricity');
             if (!isSource) continue;
             if (visited.has(y * width + x)) continue;
 
@@ -401,23 +386,19 @@ function runElectricalSimulation() {
 
                         if (isConductive(nb)) {
                             nb.electrified = true;
-                            nb.electrifiedTimer = 12;
                             queue.push([nx, ny]);
                         } else if (nb.type === 'bulb') {
                             nb.lit = true;
-                            nb.litTimer = 12;
                             queue.push([nx, ny]);
                         } else if (nb.type === 'door') {
                             nb.powered = true;
-                            nb.poweredTimer = 12;
                             queue.push([nx, ny]);
                         } else if (nb.type === 'water' && Math.random() < 0.25) {
                             nb.electrified = true;
-                            nb.electrifiedTimer = 4;
                         } else if (nb.type === 'explosive' || nb.type === 'tnt') {
                             if (Math.random() < 0.5) explode(nx, ny, nb.type === 'tnt' ? 20 : 15);
                         } else if (nb.type === 'magnet') {
-                            nb.powered = true; nb.poweredTimer = 12;
+                            nb.powered = true;
                             queue.push([nx, ny]);
                         }
                     }
@@ -432,7 +413,7 @@ const DOOR_EXPAND = 6; // expande 6 celdas a cada lado
 
 function updateDoor(x, y) {
     const p = grid[y][x]; if (!p || p.type !== 'door') return;
-    const on = p.powered && p.poweredTimer > 0;
+    const on = p.powered;
     if (on && !p.expanded && !p.isExt) {
         for (const ddx of [-1, 1]) {
             for (let step = 1; step <= DOOR_EXPAND; step++) {
@@ -444,7 +425,6 @@ function updateDoor(x, y) {
         }
         p.expanded = true;
     } else if (!on && p.expanded && !p.isExt) {
-        // Eliminar extensiones hasta DOOR_EXPAND*2+2 a cada lado
         for (let ddx = -(DOOR_EXPAND+2); ddx <= (DOOR_EXPAND+2); ddx++) {
             const nx = x + ddx;
             if (nx >= 0 && nx < width && nx !== x) {
@@ -808,17 +788,17 @@ function render(){
         else if(p.type==='portal'){const v=Math.sin(t/100)*0.3+0.7;c=`rgb(${139*v|0},0,${255*v|0})`;}
         else if(p.type==='uranium'){const v=Math.sin(t/300)*0.3+0.7;c=`rgb(0,${255*v|0},0)`;}
         else if(p.type==='electricity'){const v=Math.random();c=`rgb(${255*v|0},${255*v|0},0)`;}
-        else if(p.electrified&&p.electrifiedTimer>0){const v=Math.sin(t/50)*0.5+0.5;c=`rgb(${100+155*v|0},${150+105*v|0},255)`;}
+        else if(p.electrified){const v=Math.sin(t/50)*0.5+0.5;c=`rgb(${100+155*v|0},${150+105*v|0},255)`;}
         else if(p.type==='bulb'&&p.lit){const v=Math.sin(t/80)*0.3+0.7;c=`rgb(255,${230+25*v|0},${80*v|0})`;}
         else if(p.type==='bulb'&&!p.lit) c='#555544';
-        else if(p.type==='door'&&p.powered&&p.poweredTimer>0){const v=Math.sin(t/100)*0.2+0.8;c=`rgb(${200*v|0},${100*v|0},${20*v|0})`;}
+        else if(p.type==='door'&&p.powered){const v=Math.sin(t/100)*0.2+0.8;c=`rgb(${200*v|0},${100*v|0},${20*v|0})`;}
         else if(p.type==='door'&&!p.powered) c='#5a3008'; // puerta apagada = color oscuro
         else if(p.type==='harvester'){const v=Math.sin(t/80)*0.3+0.7;c=`rgb(255,${100+60*v|0},0)`;}
         else if(p.type==='condenser'){const v=Math.sin(t/800)*0.08+0.92;c=`rgb(${68*v|0},${136*v|0},${180*v|0})`;}
         else if(p.type==='firestone'){const v=Math.sin(t/200)*0.25+0.75;c=`rgb(${210*v|0},${45*v|0},0)`;}
         else if(p.type==='rubber') c='#2a2a2a';
         else if(p.type==='magnet'){
-            if(p.powered&&p.poweredTimer>0){const v=Math.sin(t/60)*0.5+0.5;c=`rgb(255,${50+100*v|0},${50+50*v|0})`;}
+            if(p.powered){const v=Math.sin(t/60)*0.5+0.5;c=`rgb(255,${50+100*v|0},${50+50*v|0})`;}
             else c='#883333';
         }
         else if(p.type==='sponge'){
@@ -871,6 +851,10 @@ function update(timestamp){
 }
 
 initUI();
+requestAnimationFrame(update);
+</script>
+</body>
+</html>
 requestAnimationFrame(update);
 </script>
 </body>
