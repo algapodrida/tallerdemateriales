@@ -158,21 +158,40 @@
         <div class="material-grid" id="materialGrid"></div>
 
         <div class="info-text">
-            💡 Click izq. → dibujar<br>
-            🖱️ Click der. → borrar<br>
-            🌿 Planta: necesita agua<br>
+            💡 Click izq. → dibujar · 🖱️ Click der. → borrar<br>
+            <br>
+            <b style="color:var(--accent-cyan);font-size:0.58rem;">REACCIONES NUEVAS</b><br>
+            🧂 Sal + Agua → sal disuelta (azul)<br>
+            🧊 Hielo + Lava → Obsidiana + Vapor<br>
+            🏖️ Arena + Agua → Tierra húmeda<br>
+            💎 Carbono + Lava → Diamante (raro)<br>
+            ⚡ Aceite/Petróleo + Electr. → Fuego<br>
+            🧪 Azufre + Agua → Ácido<br>
+            💥 Vidrio + Neutrón → Arena<br>
+            🌈 Neón + Electr. → Plasma rojo<br>
+            ☠️ Mercurio + Calor → Humo tóxico<br>
+            ✨ Polvo★ + Diamante → Plasma<br>
+            🌱 Semilla + Tierra húmeda → Planta<br>
+            🧱 P.Hormigón + Lava → Ladrillo<br>
+            🔥 Metano + Cloro → Fuego + Humo<br>
+            ⚗️ Agua + Electr. → H₂ + O₂<br>
+            🧫 Ácido + Vidrio → Arena<br>
+            🐚 Coral crece más en agua salada<br>
+            🌑 Mat.Oscura + Vacío → Explosión<br>
+            <br>
+            <b style="color:var(--accent-cyan);font-size:0.58rem;">ESPECIALES</b><br>
             ⚡ Metales → conducen electricidad<br>
             🔵 Condensador: vapor→agua<br>
             🔴 PiedraFuego: agua→vapor<br>
-            🧤 Goma: aísla la electricidad<br>
+            🧤 Goma: aísla electricidad<br>
             💡 Bombilla: brilla con corriente<br>
             🚪 Puerta: se expande con corriente<br>
-            🌵 Sin agua → se seca<br>
-            🔪 Cosechadora: rebota y borra<br>
             🧲 Imán: atrae metales<br>
             ❄️ Cryo: enfría y congela<br>
             💎 Diamante: indestructible<br>
-            🌊 Esponja: absorbe líquidos
+            🌊 Esponja: absorbe líquidos<br>
+            🌿 Planta: se seca sin agua<br>
+            🔪 Cosechadora: rebota y borra
         </div>
     </aside>
     <div class="canvas-container">
@@ -723,6 +742,107 @@ function checkReactions(x, y) {
             for(let py=Math.max(0,y-100);py<Math.min(height,y+100);py+=5) for(let px=Math.max(0,x-100);px<Math.min(width,x+100);px+=5){
                 const pp=grid[py][px];if(pp&&pp.type==='portal'&&(px!==x||py!==y)){for(let ty=-2;ty<=2;ty++)for(let tx=-2;tx<=2;tx++){const tpx=px+tx,tpy=py+ty;if(tpx>=0&&tpx<width&&tpy>=0&&tpy<height&&!grid[tpy][tpx]){grid[tpy][tpx]=nb;grid[ny][nx]=null;return;}}}
             }
+        }
+
+        // ── NUEVAS REACCIONES ────────────────────────────────────────────────
+
+        // 1. Sal + agua → sal disuelta (desaparece lentamente, tiñe el agua)
+        if(type==='salt'&&nb.type==='water'&&Math.random()<0.04){
+            grid[y][x]=null; nb.salted=true; nb.color='#88ccff'; return;
+        }
+
+        // 2. Hielo + lava → obsidiana + steam (colisión épica)
+        if(type==='ice'&&(nb.type==='lava'||nb.type==='magma')&&Math.random()<0.15){
+            grid[y][x]={type:'obsidian'}; grid[ny][nx]={type:'steam',life:180};
+            for(let i=0;i<6;i++){const a=Math.PI*2*i/6,fx=Math.round(x+Math.cos(a)*3),fy=Math.round(y+Math.sin(a)*3);if(fx>=0&&fx<width&&fy>=0&&fy<height&&!grid[fy][fx])grid[fy][fx]={type:'steam',life:120};}
+            return;
+        }
+
+        // 3. Arena + agua → barro (dirt húmedo)
+        if(type==='sand'&&nb.type==='water'&&Math.random()<0.006){
+            grid[y][x]={type:'dirt',wet:true,color:'#3d2817'}; grid[ny][nx]=null; return;
+        }
+
+        // 4. Carbono + calor → diamante (rarísimo, muy especial)
+        if(type==='carbon'&&(nb.type==='lava'||nb.type==='magma'||nb.type==='plasma')&&Math.random()<0.002){
+            grid[y][x]={type:'diamond'}; return;
+        }
+
+        // 5. Aceite/petróleo + agua → flotan separados (oil repels, no reaction, pero:
+        //    petróleo + electricidad → fuego + explosión
+        if((type==='oil'||type==='petroleum')&&nb.type==='electricity'&&Math.random()<0.4){
+            grid[y][x]={type:'fire',life:150}; return;
+        }
+
+        // 6. Azufre + agua → ácido suave (H2S simplificado)
+        if(type==='sulfur'&&nb.type==='water'&&Math.random()<0.015){
+            grid[y][x]={type:'acid'}; grid[ny][nx]={type:'acid'}; return;
+        }
+
+        // 7. Vidrio + impacto de neutrones → arena (se rompe)
+        if(type==='glass'&&nb.type==='neutron'&&Math.random()<0.5){
+            grid[y][x]={type:'sand'}; grid[ny][nx]=null; return;
+        }
+
+        // 8. Neón + electricidad → brilla intensamente (plasma de color)
+        if(type==='neon'&&nb.type==='electricity'&&Math.random()<0.3){
+            grid[y][x]={type:'plasma',life:40,color:'#ff2200'}; return;
+        }
+
+        // 9. Mercurio + calor (fuego/lava) → vapor tóxico (humo)
+        if(type==='mercury'&&(nb.type==='fire'||nb.type==='lava'||nb.type==='plasma')&&Math.random()<0.08){
+            grid[y][x]={type:'smoke',life:200,color:'#886600'}; return;
+        }
+
+        // 10. Polvo★ (stardust) + diamante → explosión de luz (plasma arcoíris)
+        if(type==='stardust'&&nb.type==='diamond'&&Math.random()<0.03){
+            for(let i=0;i<8;i++){const a=Math.PI*2*i/8,fx=Math.round(x+Math.cos(a)*4),fy=Math.round(y+Math.sin(a)*4);if(fx>=0&&fx<width&&fy>=0&&fy<height&&!grid[fy][fx])grid[fy][fx]={type:'plasma',life:60};}
+            grid[y][x]=null; return;
+        }
+
+        // 11. Semilla + tierra húmeda → brota directamente (sin necesitar agua extra)
+        if(type==='seed'&&nb.type==='dirt'&&nb.wet&&Math.random()<0.02){
+            grid[y][x]={type:'plant',growth:0}; return;
+        }
+
+        // 12. Hormigón en polvo + lava → ladrillo cocido (baked brick)
+        if(type==='concrete_powder'&&(nb.type==='lava'||nb.type==='magma')&&Math.random()<0.1){
+            grid[y][x]={type:'brick'}; return;
+        }
+
+        // 13. Metano + cloro → fuego + humo (reacción química inflamable)
+        if((type==='methane'&&nb.type==='chlorine')||(type==='chlorine'&&nb.type==='methane')){
+            if(Math.random()<0.08){
+                grid[y][x]={type:'fire',life:80}; grid[ny][nx]={type:'smoke',life:120}; return;
+            }
+        }
+
+        // 14. Agua + electricidad → gas hidrógeno + oxígeno (electrólisis)
+        if(type==='water'&&nb.type==='electricity'&&Math.random()<0.05){
+            grid[y][x]={type:'hydrogen',life:180};
+            const ox=x+Math.floor(Math.random()*3)-1,oy=y-1;
+            if(ox>=0&&ox<width&&oy>=0&&!grid[oy][ox]) grid[oy][ox]={type:'oxygen',life:200};
+            return;
+        }
+
+        // 15. Ácido + vidrio → corroe el vidrio (vidrio es vulnerable al HF simplificado)
+        if(type==='acid'&&nb.type==='glass'&&Math.random()<0.04){
+            grid[ny][nx]={type:'sand'}; if(Math.random()<0.4) grid[y][x]=null; return;
+        }
+
+        // BONUS 16. Coral + sal disuelta (agua salada) → crece más rápido
+        if(type==='coral'&&nb.type==='water'&&nb.salted&&Math.random()<0.01){
+            const dirs=[[0,-1],[-1,0],[1,0],[0,1]];
+            const d=dirs[Math.floor(Math.random()*4)];
+            const cx2=x+d[0],cy2=y+d[1];
+            if(cx2>=0&&cx2<width&&cy2>=0&&cy2<height&&!grid[cy2][cx2])grid[cy2][cx2]={type:'coral'};
+        }
+
+        // BONUS 17. Materia oscura + void → gran explosión gravitacional
+        if(type==='darkMatter'&&nb.type==='void'&&Math.random()<0.008){
+            explode(x,y,25);
+            for(let i=0;i<12;i++){const a=Math.PI*2*i/12,fx=Math.round(x+Math.cos(a)*10),fy=Math.round(y+Math.sin(a)*10);if(fx>=0&&fx<width&&fy>=0&&fy<height)grid[fy][fx]={type:'plasma',life:80};}
+            grid[y][x]=null; grid[ny][nx]=null; return;
         }
     }
     if(type==='wood'&&p.burning){p.burnTime=(p.burnTime||150)-1;if(p.burnTime<=0)grid[y][x]={type:'fire',life:30};else if(Math.random()<0.1&&y>0&&!grid[y-1][x])grid[y-1][x]={type:'smoke',life:120};}
