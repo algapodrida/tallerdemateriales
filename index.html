@@ -60,7 +60,6 @@
         .sidebar { background:var(--bg-panel); border:2px solid var(--accent-cyan); border-radius:12px; padding:0.8rem; width:268px; flex-shrink:0; box-shadow:0 8px 32px rgba(0,255,242,0.15); overflow-y:auto; max-height:calc(100vh - 100px); display:flex; flex-direction:column; gap:0.5rem; }
         .sidebar::-webkit-scrollbar{width:5px} .sidebar::-webkit-scrollbar-track{background:var(--bg-dark);border-radius:4px} .sidebar::-webkit-scrollbar-thumb{background:var(--accent-cyan);border-radius:4px}
 
-        /* Controles superiores compactos */
         .top-controls { display:flex; flex-direction:column; gap:0.3rem; }
         .top-controls-row { display:grid; grid-template-columns:1fr 1fr; gap:0.3rem; }
         .eraser-btn { background:linear-gradient(135deg,#1a0f0a,#2a1510); border:2px solid #ff6b35; border-radius:8px; padding:0.45rem 0.6rem; cursor:pointer; transition:all 0.3s ease; font-family:'JetBrains Mono',monospace; font-weight:600; font-size:0.62rem; text-transform:uppercase; letter-spacing:0.5px; color:#ff6b35; width:100%; display:flex; align-items:center; justify-content:center; gap:0.4rem; }
@@ -72,14 +71,18 @@
         .btn-sm:hover{box-shadow:0 3px 10px rgba(0,255,242,0.3);transform:translateY(-1px);border-color:var(--accent-cyan);}
         .btn-sm.pause-active{border-color:var(--accent-magenta);color:var(--accent-magenta);}
 
-        /* Slider de pincel inline */
         .brush-row { display:flex; align-items:center; gap:0.5rem; background:rgba(19,25,32,0.8); border:1px solid rgba(0,255,242,0.2); border-radius:6px; padding:0.4rem 0.6rem; }
         .brush-label { font-size:0.56rem; color:var(--text-secondary); text-transform:uppercase; white-space:nowrap; }
         .brush-val { font-size:0.6rem; color:var(--accent-cyan); font-weight:600; white-space:nowrap; min-width:20px; text-align:right; }
         .brush-row input[type="range"]{ flex:1; height:4px; border-radius:3px; background:linear-gradient(90deg,var(--accent-cyan),var(--accent-magenta)); outline:none; -webkit-appearance:none; }
         .brush-row input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent-yellow);cursor:pointer;border:2px solid var(--bg-dark);box-shadow:0 0 6px rgba(255,235,59,0.6)}
 
-        /* Speed controls */
+        /* Frecuencia row — accent verde para diferenciar */
+        .freq-row { display:flex; align-items:center; gap:0.5rem; background:rgba(19,25,32,0.8); border:1px solid rgba(0,255,100,0.25); border-radius:6px; padding:0.4rem 0.6rem; }
+        .freq-row input[type="range"]{ flex:1; height:4px; border-radius:3px; background:linear-gradient(90deg,#00ff88,#ffeb3b); outline:none; -webkit-appearance:none; }
+        .freq-row input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#00ff88;cursor:pointer;border:2px solid var(--bg-dark);box-shadow:0 0 6px rgba(0,255,136,0.7)}
+        .freq-val { font-size:0.6rem; color:#00ff88; font-weight:600; white-space:nowrap; min-width:28px; text-align:right; }
+
         .speed-row { display:grid; grid-template-columns:repeat(4,1fr); gap:0.25rem; }
         .speed-btn { background:linear-gradient(135deg,var(--bg-dark),#1a1f2e); border:1.5px solid rgba(255,255,255,0.1); border-radius:5px; padding:0.3rem 0.1rem; cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:0.58rem; font-weight:600; color:var(--text-secondary); text-align:center; transition:all 0.2s ease; }
         .speed-btn:hover{border-color:rgba(0,255,242,0.4);color:var(--text-primary);}
@@ -98,6 +101,15 @@
         canvas{border:3px solid var(--accent-cyan);border-radius:12px;box-shadow:0 0 40px rgba(0,255,242,0.4),0 0 80px rgba(255,0,170,0.2);cursor:crosshair;background:#000;animation:canvasGlow 4s ease-in-out infinite}
         @keyframes canvasGlow{0%,100%{box-shadow:0 0 40px rgba(0,255,242,0.4),0 0 80px rgba(255,0,170,0.2)}50%{box-shadow:0 0 60px rgba(0,255,242,0.6),0 0 100px rgba(255,0,170,0.3)}}
         .controls-sep { border:none; border-top:1px solid rgba(0,255,242,0.15); margin:0.1rem 0; }
+
+        /* right-click hint badge */
+        .rmb-hint {
+            font-size:0.52rem; color:var(--text-secondary);
+            background:rgba(255,107,53,0.08); border:1px solid rgba(255,107,53,0.25);
+            border-radius:5px; padding:0.25rem 0.5rem; text-align:center;
+            letter-spacing:0.3px;
+        }
+        body.light-mode .rmb-hint { background:rgba(176,48,96,0.06); border-color:rgba(176,48,96,0.25); }
     </style>
 </head>
 <body>
@@ -105,19 +117,29 @@
 <div class="container">
     <aside class="sidebar">
 
-        <!-- CONTROLES SUPERIORES -->
         <div class="section-title">Controles</div>
         <div class="top-controls">
             <button class="eraser-btn" id="eraserBtn">🧹 Goma de Borrar</button>
+            <div class="rmb-hint">🖱️ Click derecho = borrar rápido</div>
             <div class="top-controls-row">
                 <button class="btn-sm" id="clearBtn">🗑️ Limpiar</button>
                 <button class="btn-sm" id="pauseBtn">⏸️ Pausar</button>
             </div>
+
+            <!-- Tamaño de pincel -->
             <div class="brush-row">
                 <span class="brush-label">Pincel</span>
                 <input type="range" id="brushSize" min="1" max="20" value="5">
                 <span class="brush-val" id="brushValue">5</span>
             </div>
+
+            <!-- Frecuencia (densidad) -->
+            <div class="freq-row">
+                <span class="brush-label" style="color:#00ff88;">Frec.</span>
+                <input type="range" id="freqSlider" min="1" max="10" value="10">
+                <span class="freq-val" id="freqValue">100%</span>
+            </div>
+
             <!-- Velocidad -->
             <div style="display:flex;align-items:center;gap:0.4rem;margin-top:0.1rem;">
                 <span style="font-size:0.56rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;">Velocidad</span>
@@ -132,19 +154,19 @@
 
         <hr class="controls-sep">
 
-        <!-- MATERIALES -->
         <div class="section-title" style="margin-top:0.3rem;">Materiales</div>
         <div class="material-grid" id="materialGrid"></div>
 
         <div class="info-text">
-            💡 Click y arrastra para dibujar<br>
+            💡 Click izq. → dibujar<br>
+            🖱️ Click der. → borrar<br>
+            🌿 Planta: necesita agua<br>
             ⚡ Metales → conducen electricidad<br>
             🔵 Condensador: vapor→agua<br>
             🔴 PiedraFuego: agua→vapor<br>
             🧤 Goma: aísla la electricidad<br>
             💡 Bombilla: brilla con corriente<br>
             🚪 Puerta: se expande con corriente<br>
-            🌿 Planta: necesita agua<br>
             🌵 Sin agua → se seca<br>
             🔪 Cosechadora: rebota y borra<br>
             🧲 Imán: atrae metales<br>
@@ -169,12 +191,17 @@ let grid = Array(height).fill(null).map(() => Array(width).fill(null));
 let selectedMaterial = 'sand';
 let isErasing = false;
 let brushSize = 5;
+// frequency: 1-10, 10 = 100% fill (default), 1 = ~10% fill
+let brushFreq = 10;
 let isDrawing = false;
 let isPaused = false;
 let simSpeed = 1;
 let frameCount = 0;
 let accumulator = 0;
 let lightMode = false;
+
+// Track which mouse button is held
+let activeButton = -1;
 
 const MATERIAL_ORDER = [
     '__Básicos',
@@ -305,6 +332,14 @@ function initUI() {
         brushSize = parseInt(e.target.value);
         document.getElementById('brushValue').textContent = brushSize;
     };
+
+    // Frequency slider
+    document.getElementById('freqSlider').oninput = e => {
+        brushFreq = parseInt(e.target.value);
+        const pct = Math.round(brushFreq * 10);
+        document.getElementById('freqValue').textContent = pct + '%';
+    };
+
     document.getElementById('clearBtn').onclick = () => {
         grid = Array(height).fill(null).map(() => Array(width).fill(null));
     };
@@ -348,7 +383,6 @@ function movePowder(x, y) {
 }
 function moveLiquid(x, y) {
     const p=grid[y][x]; if(!p)return;
-    // Glue moves very slowly
     if(p.type==='glue'&&Math.random()<0.85) return;
     if(y<height-1&&!grid[y+1][x]){grid[y+1][x]=p;grid[y][x]=null;return;}
     const d=Math.random()<0.5?-1:1;
@@ -364,7 +398,7 @@ function explode(x, y, radius) {
         const dist=Math.sqrt(dx*dx+dy*dy);
         if(dist<=radius){const nx=x+dx,ny=y+dy;if(nx>=0&&nx<width&&ny>=0&&ny<height&&Math.random()<(1-dist/radius)*0.8){
             const t=grid[ny][nx];
-            if(t&&t.type==='diamond') continue; // diamond is indestructible
+            if(t&&t.type==='diamond') continue;
             grid[ny][nx]=dist<radius*0.4?{type:'plasma',life:60}:{type:'fire',life:50};
         }}
     }
@@ -374,7 +408,7 @@ function explodeFireworks(x, y) {
         [255,50,50],[255,150,0],[255,255,0],[0,255,80],[0,200,255],
         [150,0,255],[255,0,180],[255,255,255],[0,255,200],[255,100,0]
     ];
-    const numBursts = 3 + Math.floor(Math.random()*3); // 3-5 bursts
+    const numBursts = 3 + Math.floor(Math.random()*3);
     for(let b=0; b<numBursts; b++){
         const bx = x + Math.floor((Math.random()-0.5)*20);
         const by = y + Math.floor((Math.random()-0.5)*20);
@@ -395,7 +429,6 @@ function explodeFireworks(x, y) {
                 grid[py2][px2] = { type:'fire', life: 20+Math.floor(fade*50), color: col };
             }
         }
-        // small smoke puff at center
         for(let i=0;i<4;i++){
             const sx=bx+Math.floor((Math.random()-0.5)*6), sy=by+Math.floor((Math.random()-0.5)*6);
             if(sx>=0&&sx<width&&sy>=0&&sy<height&&!grid[sy][sx]) grid[sy][sx]={type:'smoke',life:60};
@@ -411,7 +444,7 @@ function propagateHeat(x,y,ht,r,prob,to) {
                 if(n&&n.type===ht&&Math.random()<prob/(d+1)){if(to)grid[ny][nx]={type:to};else n.heating=true;q.push([nx,ny,d+1]);}}}}
 }
 
-// ─── ELECTRICIDAD: sistema global de flood fill ─────────────────────────────
+// ─── ELECTRICIDAD ─────────────────────────────────────────────────────────────
 function isConductive(p) {
     if (!p) return false;
     if (p.type === 'rubber') return false;
@@ -420,7 +453,6 @@ function isConductive(p) {
 }
 
 function runElectricalSimulation() {
-    // Paso 1: apagar TODO el estado eléctrico antes de recalcular
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             const p = grid[y][x]; if (!p) continue;
@@ -430,25 +462,17 @@ function runElectricalSimulation() {
             if (p.type === 'magnet') p.powered = false;
         }
     }
-
-    // Paso 2: flood fill SOLO desde partículas de electricidad activas
     const visited = new Set();
-
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             const p = grid[y][x];
             if (!p) continue;
-            // ÚNICA fuente válida: partícula de electricidad
-            const isSource = (p.type === 'electricity');
-            if (!isSource) continue;
+            if (p.type !== 'electricity') continue;
             if (visited.has(y * width + x)) continue;
-
             const queue = [[x, y]];
             visited.add(y * width + x);
-
             while (queue.length > 0) {
                 const [cx, cy] = queue.shift();
-
                 for (let dy = -1; dy <= 1; dy++) {
                     for (let dx = -1; dx <= 1; dx++) {
                         if (!dx && !dy) continue;
@@ -459,26 +483,13 @@ function runElectricalSimulation() {
                         const nb = grid[ny][nx];
                         if (!nb) continue;
                         if (nb.type === 'rubber') continue;
-
                         visited.add(idx);
-
-                        if (isConductive(nb)) {
-                            nb.electrified = true;
-                            queue.push([nx, ny]);
-                        } else if (nb.type === 'bulb') {
-                            nb.lit = true;
-                            queue.push([nx, ny]);
-                        } else if (nb.type === 'door') {
-                            nb.powered = true;
-                            queue.push([nx, ny]);
-                        } else if (nb.type === 'water' && Math.random() < 0.25) {
-                            nb.electrified = true;
-                        } else if (nb.type === 'explosive' || nb.type === 'tnt') {
-                            if (Math.random() < 0.5) explode(nx, ny, nb.type === 'tnt' ? 20 : 15);
-                        } else if (nb.type === 'magnet') {
-                            nb.powered = true;
-                            queue.push([nx, ny]);
-                        }
+                        if (isConductive(nb)) { nb.electrified = true; queue.push([nx, ny]); }
+                        else if (nb.type === 'bulb') { nb.lit = true; queue.push([nx, ny]); }
+                        else if (nb.type === 'door') { nb.powered = true; queue.push([nx, ny]); }
+                        else if (nb.type === 'water' && Math.random() < 0.25) { nb.electrified = true; }
+                        else if (nb.type === 'explosive' || nb.type === 'tnt') { if (Math.random() < 0.5) explode(nx, ny, nb.type === 'tnt' ? 20 : 15); }
+                        else if (nb.type === 'magnet') { nb.powered = true; queue.push([nx, ny]); }
                     }
                 }
             }
@@ -486,9 +497,7 @@ function runElectricalSimulation() {
     }
 }
 
-// ─── PUERTA (se expande mucho más) ──────────────────────────────────────────
-const DOOR_EXPAND = 6; // expande 6 celdas a cada lado
-
+const DOOR_EXPAND = 6;
 function updateDoor(x, y) {
     const p = grid[y][x]; if (!p || p.type !== 'door') return;
     const on = p.powered;
@@ -514,7 +523,6 @@ function updateDoor(x, y) {
     }
 }
 
-// ─── IMÁN ───────────────────────────────────────────────────────────────────
 function updateMagnet(x, y) {
     const p = grid[y][x];
     if (!p || p.type !== 'magnet') return;
@@ -529,27 +537,23 @@ function updateMagnet(x, y) {
             if (nx<0||nx>=width||ny<0||ny>=height) continue;
             const nb = grid[ny][nx];
             if (!nb) continue;
-            // Atrae todos los metales (conductores) y mercurio
             const mat = MATERIALS[nb.type];
             const attracts = nb.type === 'mercury' || (mat && mat.conductive);
             if (!attracts) continue;
-            // Solo mover si hay hueco en la dirección del imán
             const tx = nx + Math.sign(x-nx);
             const ty = ny + Math.sign(y-ny);
             if (tx>=0&&tx<width&&ty>=0&&ty<height&&!grid[ty][tx]&&(tx!==x||ty!==y)) {
-                grid[ty][tx] = nb;
-                grid[ny][nx] = null;
+                grid[ty][tx] = nb; grid[ny][nx] = null;
             }
         }
     }
 }
 
-// ─── ESPONJA ─────────────────────────────────────────────────────────────────
 function updateSponge(x, y) {
     const p = grid[y][x];
     if (!p || p.type !== 'sponge') return;
     const absorbed = p.absorbed || 0;
-    if (absorbed >= 20) return; // full
+    if (absorbed >= 20) return;
     for (let dy = -1; dy <= 1; dy++) {
         for (let dx = -1; dx <= 1; dx++) {
             if (!dx && !dy) continue;
@@ -557,15 +561,12 @@ function updateSponge(x, y) {
             if (nx<0||nx>=width||ny<0||ny>=height) continue;
             const nb = grid[ny][nx];
             if (nb && (nb.type==='water'||nb.type==='slime') && Math.random()<0.3) {
-                grid[ny][nx] = null;
-                p.absorbed = absorbed + 1;
-                return;
+                grid[ny][nx] = null; p.absorbed = absorbed + 1; return;
             }
         }
     }
 }
 
-// ─── CRYO ────────────────────────────────────────────────────────────────────
 function updateCryo(x, y) {
     const p = grid[y][x];
     if (!p || p.type !== 'cryo') return;
@@ -588,10 +589,7 @@ function updateParticle(x, y) {
     const p = grid[y][x]; if (!p) return;
     const type = p.type;
     const mat = MATERIALS[type]; if (!mat) return;
-
-    if (type === 'diamond') return; // indestructible, no update
-
-    // Vida
+    if (type === 'diamond') return;
     if (p.life !== undefined) {
         p.life--;
         if (p.life<=0) {
@@ -599,13 +597,10 @@ function updateParticle(x, y) {
             return;
         }
     }
-
     if (type==='door') updateDoor(x, y);
     if (type==='magnet') updateMagnet(x, y);
     if (type==='sponge') updateSponge(x, y);
     if (type==='cryo') updateCryo(x, y);
-
-    // Vacío: absorbe todo alrededor
     if (type==='void') {
         for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++) {
             if(!dx&&!dy) continue;
@@ -617,8 +612,6 @@ function updateParticle(x, y) {
         }
         return;
     }
-
-    // Movimiento
     if (mat.type==='powder') movePowder(x, y);
     else if (mat.type==='liquid') moveLiquid(x, y);
     else if (mat.type==='gas') {
@@ -629,7 +622,7 @@ function updateParticle(x, y) {
         if(!p.vx) p.vx = 1;
         if(!p.moveTimer) p.moveTimer = 0;
         p.moveTimer++;
-        if(p.moveTimer < 4) return; // mueve 1px cada 4 frames = mucho más lento
+        if(p.moveTimer < 4) return;
         p.moveTimer = 0;
         const nx = x + p.vx;
         if(nx<0||nx>=width){ p.vx = -p.vx; return; }
@@ -639,11 +632,9 @@ function updateParticle(x, y) {
         else { p.vx = -p.vx; }
         return;
     } else if (type==='stardust') {
-        // stardust floats and sparkles, random walk
         if(Math.random()<0.5) moveGas(x,y,0.5);
         else movePowder(x,y);
     }
-
     checkReactions(x, y);
 }
 
@@ -651,45 +642,20 @@ function updateParticle(x, y) {
 function checkReactions(x, y) {
     const p = grid[y][x]; if (!p) return;
     const type = p.type;
-
     for (let dy=-1; dy<=1; dy++) for (let dx=-1; dx<=1; dx++) {
         if (!dx&&!dy) continue;
         const nx=x+dx, ny=y+dy;
         if (nx<0||nx>=width||ny<0||ny>=height) continue;
         const nb = grid[ny][nx]; if (!nb) continue;
-
-        // Diamond: indestructible - skip reactions
         if (nb.type==='diamond') continue;
-
-        if (type==='condenser' && nb.type==='steam' && Math.random()<0.3) {
-            grid[ny][nx] = {type:'water'}; continue;
-        }
-        if (type==='firestone' && nb.type==='water' && Math.random()<0.2) {
-            grid[ny][nx] = {type:'steam', life:160}; continue;
-        }
+        if (type==='condenser' && nb.type==='steam' && Math.random()<0.3) { grid[ny][nx] = {type:'water'}; continue; }
+        if (type==='firestone' && nb.type==='water' && Math.random()<0.2) { grid[ny][nx] = {type:'steam', life:160}; continue; }
         if (type==='rubber'||nb.type==='rubber') continue;
-
-        // Slime + acid = neutralization
-        if ((type==='slime'&&nb.type==='acid')||(type==='acid'&&nb.type==='slime')) {
-            if(Math.random()<0.2){grid[y][x]=null;grid[ny][nx]=null;return;}
-        }
-        // Slime + water = spreads slowly (just flavour, absorbed)
+        if ((type==='slime'&&nb.type==='acid')||(type==='acid'&&nb.type==='slime')) { if(Math.random()<0.2){grid[y][x]=null;grid[ny][nx]=null;return;} }
         if (type==='slime'&&nb.type==='water'&&Math.random()<0.05) { grid[ny][nx]={type:'slime'}; }
-
-        // Glue solidifies when touching stone/concrete/brick
-        if (type==='glue'&&(nb.type==='stone'||nb.type==='concrete'||nb.type==='brick')&&Math.random()<0.08) {
-            grid[y][x]={type:'stone'}; return;
-        }
-
-        // Fungus grows on dirt/wood with water nearby
-        if (type==='fungus'&&(nb.type==='dirt'||nb.type==='wood')&&Math.random()<0.005) {
-            grid[ny][nx]={type:'fungus'};
-        }
-        if (type==='fungus'&&(nb.type==='fire'||nb.type==='lava'||nb.type==='plasma')&&Math.random()<0.3){
-            grid[y][x]=null; return;
-        }
-
-        // Coral grows in water
+        if (type==='glue'&&(nb.type==='stone'||nb.type==='concrete'||nb.type==='brick')&&Math.random()<0.08) { grid[y][x]={type:'stone'}; return; }
+        if (type==='fungus'&&(nb.type==='dirt'||nb.type==='wood')&&Math.random()<0.005) { grid[ny][nx]={type:'fungus'}; }
+        if (type==='fungus'&&(nb.type==='fire'||nb.type==='lava'||nb.type==='plasma')&&Math.random()<0.3){ grid[y][x]=null; return; }
         if (type==='coral'&&nb.type==='water'&&Math.random()<0.003) {
             const dirs=[[0,-1],[-1,0],[1,0]];
             const d=dirs[Math.floor(Math.random()*3)];
@@ -697,39 +663,24 @@ function checkReactions(x, y) {
             if(cx2>=0&&cx2<width&&cy2>=0&&cy2<height&&!grid[cy2][cx2])grid[cy2][cx2]={type:'coral'};
         }
         if (type==='coral'&&(nb.type==='acid')&&Math.random()<0.2){ grid[y][x]=null; return; }
-
-        // Stardust: magical reactions
-        if (type==='stardust'&&nb.type==='water'&&Math.random()<0.05){
-            grid[ny][nx]={type:'steam',life:200}; grid[y][x]={type:'stardust',life:80}; continue;
-        }
-        if (type==='stardust'&&nb.type==='fire'&&Math.random()<0.1){
-            grid[y][x]={type:'plasma',life:120}; return;
-        }
-
-        // Dark matter: absorbs everything slowly
-        if (type==='darkMatter'&&nb.type!=='darkMatter'&&nb.type!=='diamond'&&Math.random()<0.02){
-            grid[ny][nx]={type:'darkMatter'}; continue;
-        }
-
+        if (type==='stardust'&&nb.type==='water'&&Math.random()<0.05){ grid[ny][nx]={type:'steam',life:200}; grid[y][x]={type:'stardust',life:80}; continue; }
+        if (type==='stardust'&&nb.type==='fire'&&Math.random()<0.1){ grid[y][x]={type:'plasma',life:120}; return; }
+        if (type==='darkMatter'&&nb.type!=='darkMatter'&&nb.type!=='diamond'&&Math.random()<0.02){ grid[ny][nx]={type:'darkMatter'}; continue; }
         if ((type==='sodium'&&nb.type==='water')||(type==='water'&&nb.type==='sodium')) {
             explode(x,y,18);
             for(let i=0;i<12;i++){const a=Math.PI*2*i/12,fx=Math.round(x+Math.cos(a)*8),fy=Math.round(y+Math.sin(a)*8);if(fx>=0&&fx<width&&fy>=0&&fy<height&&!grid[fy][fx])grid[fy][fx]={type:'hydrogen',life:150};}
             return;
         }
-
         if ((type==='hydrogen'&&nb.type==='oxygen')||(type==='oxygen'&&nb.type==='hydrogen')) {
             let fire=false;
             outer: for(let sy=-3;sy<=3;sy++) for(let sx=-3;sx<=3;sx++){const cy=y+sy,cx=x+sx;if(cx>=0&&cx<width&&cy>=0&&cy<height){const c=grid[cy][cx];if(c&&(c.type==='fire'||c.type==='plasma'||c.type==='lava'||c.type==='electricity')){fire=true;break outer;}}}
             if(fire&&Math.random()<0.12){explode(x,y,8);grid[y][x]={type:'water'};grid[ny][nx]={type:'water'};for(let i=0;i<4;i++){const a=Math.PI*2*i/4,fx=Math.round(x+Math.cos(a)*3),fy=Math.round(y+Math.sin(a)*3);if(fx>=0&&fx<width&&fy>=0&&fy<height&&!grid[fy][fx])grid[fy][fx]={type:'steam',life:120};}return;}
             if(!fire&&Math.random()<0.004){grid[y][x]={type:'water'};grid[ny][nx]=null;return;}
         }
-
         if((type==='phosphorus'&&nb.type==='oxygen')||(type==='oxygen'&&nb.type==='phosphorus'))
             if(Math.random()<0.1){grid[y][x]={type:'fire',life:120};grid[ny][nx]={type:'fire',life:120};return;}
-
         if(type==='lava'&&nb.type==='water'){grid[y][x]={type:'stone'};grid[ny][nx]={type:'steam',life:100};for(let i=0;i<4;i++){const a=Math.PI*2*i/4,fx=Math.round(x+Math.cos(a)*2),fy=Math.round(y+Math.sin(a)*2);if(fx>=0&&fx<width&&fy>=0&&fy<height&&!grid[fy][fx])grid[fy][fx]={type:'steam',life:80};}return;}
         if(type==='magma'&&nb.type==='water'){grid[y][x]={type:'lava'};grid[ny][nx]={type:'steam',life:120};explode(x,y,8);return;}
-
         if((type==='fire'||type==='lava'||type==='plasma'||type==='magma')&&Math.random()<0.2){
             if(nb.type==='oil'||nb.type==='petroleum') grid[ny][nx]={type:'fire',life:120};
             else if(nb.type==='wood'&&!nb.burning){nb.burning=true;nb.burnTime=150;}
@@ -744,45 +695,36 @@ function checkReactions(x, y) {
             else if(nb.type==='slime'&&Math.random()<0.4) grid[ny][nx]={type:'smoke',life:80};
             else if(nb.type==='fungus'&&Math.random()<0.4) grid[ny][nx]=null;
         }
-
         if((type==='explosive'||type==='tnt')&&(nb.type==='fire'||nb.type==='lava'||nb.type==='plasma')){explode(x,y,type==='tnt'?20:15);return;}
-
         if(type==='fireworks'&&(nb.type==='fire'||nb.type==='lava'||nb.type==='plasma'||nb.type==='electricity')&&Math.random()<0.6){explodeFireworks(x,y);return;}
         if((nb.type==='fireworks')&&(type==='fire'||type==='lava'||type==='plasma'||type==='electricity')&&Math.random()<0.6){explodeFireworks(nx,ny);continue;}
-
         if(type==='ice'&&Math.random()<0.02){
             if(nb.type==='water'){grid[ny][nx]={type:'ice'};propagateHeat(nx,ny,'water',4,0.3,'ice');}
             else if(nb.type==='fire'||nb.type==='lava') grid[ny][nx]={type:'water'};
         }
-
         if(type==='seed'&&nb.type==='water'&&Math.random()<0.05){grid[y][x]={type:'plant',growth:0};if(y>0&&!grid[y-1][x])grid[y-1][x]={type:'plant',growth:0};return;}
         if(type==='dirt'&&nb.type==='water'&&!p.wet&&Math.random()<0.1){p.wet=true;p.color='#3d2817';grid[ny][nx]=null;propagateHeat(x,y,'dirt',5,0.4,null);}
         if(type==='concrete_powder'&&nb.type==='water'&&Math.random()<0.3){grid[y][x]={type:'concrete'};if(Math.random()<0.5)grid[ny][nx]=null;propagateHeat(x,y,'concrete_powder',8,0.5,'concrete');return;}
         if(type==='clay'&&(nb.type==='lava'||nb.type==='fire'||nb.type==='plasma'||nb.type==='magma')&&Math.random()<0.08){grid[y][x]={type:'brick'};propagateHeat(x,y,'clay',15,0.6,'brick');return;}
         if(type==='lava'&&nb.type==='sand'&&Math.random()<0.08){grid[ny][nx]={type:'glass'};propagateHeat(nx,ny,'sand',4,0.4,'glass');}
-
         if(type==='acid'&&Math.random()<0.15){
             if(nb.type==='metal'||nb.type==='copper'||nb.type==='silver'){grid[ny][nx]={type:'smoke',life:80};if(Math.random()<0.3)grid[y][x]=null;}
             else if(nb.type==='stone'||nb.type==='concrete'){if(Math.random()<0.05)grid[ny][nx]={type:'sand',color:'#888'};}
             else if(nb.type==='wood'||nb.type==='plant') grid[ny][nx]={type:'smoke',life:60};
         }
-
         if(type==='chlorine'&&Math.random()<0.1){
             if(nb.type==='sodium'){grid[y][x]={type:'salt'};grid[ny][nx]={type:'salt'};return;}
             if(nb.type==='hydrogen'){grid[y][x]={type:'acid'};grid[ny][nx]=null;return;}
         }
-
         if(type==='uranium'&&nb.type==='neutron'&&Math.random()<0.5){explode(x,y,20);for(let i=0;i<8;i++){const a=Math.PI*2*i/8,fx=Math.round(x+Math.cos(a)*5),fy=Math.round(y+Math.sin(a)*5);if(fx>=0&&fx<width&&fy>=0&&fy<height)grid[fy][fx]={type:'neutron',life:50,vx:Math.round(Math.cos(a)*2),vy:Math.round(Math.sin(a)*2)};}return;}
         if(type==='mercury'&&nb.type==='metal'&&Math.random()<0.03) grid[ny][nx]={type:'mercury'};
         if(type==='ammonia'&&nb.type==='fire'&&Math.random()<0.15){explode(x,y,10);for(let i=0;i<6;i++){const a=Math.PI*2*i/6,fx=Math.round(x+Math.cos(a)*4),fy=Math.round(y+Math.sin(a)*4);if(fx>=0&&fx<width&&fy>=0&&fy<height)grid[fy][fx]={type:'nitrogen',life:150};}return;}
-
         if(type==='portal'&&Math.random()<0.05&&nb.type!=='portal'&&nb.type!=='obsidian'){
             for(let py=Math.max(0,y-100);py<Math.min(height,y+100);py+=5) for(let px=Math.max(0,x-100);px<Math.min(width,x+100);px+=5){
                 const pp=grid[py][px];if(pp&&pp.type==='portal'&&(px!==x||py!==y)){for(let ty=-2;ty<=2;ty++)for(let tx=-2;tx<=2;tx++){const tpx=px+tx,tpy=py+ty;if(tpx>=0&&tpx<width&&tpy>=0&&tpy<height&&!grid[tpy][tpx]){grid[tpy][tpx]=nb;grid[ny][nx]=null;return;}}}
             }
         }
     }
-
     if(type==='wood'&&p.burning){p.burnTime=(p.burnTime||150)-1;if(p.burnTime<=0)grid[y][x]={type:'fire',life:30};else if(Math.random()<0.1&&y>0&&!grid[y-1][x])grid[y-1][x]={type:'smoke',life:120};}
     if(type==='coal'&&p.burning){p.burnTime=(p.burnTime||300)-1;if(p.burnTime<=0)grid[y][x]=null;else if(Math.random()<0.15&&y>0&&!grid[y-1][x])grid[y-1][x]={type:'fire',life:70};}
     if(type==='plant'){
@@ -805,7 +747,6 @@ function checkReactions(x, y) {
         }
     }
     if(type==='fungus'){
-        // fungus slowly spreads on organic material
         if(Math.random()<0.003){
             const dirs=[[0,-1],[0,1],[-1,0],[1,0]];
             const d=dirs[Math.floor(Math.random()*4)];
@@ -838,48 +779,67 @@ function isValidPortalFrame(x,y,w,h){
 }
 
 // ─── INPUT ─────────────────────────────────────────────────────────────────
-canvas.addEventListener('mousedown', e=>{isDrawing=true;applyTool(e);});
-canvas.addEventListener('mousemove', e=>{if(isDrawing)applyTool(e);});
-canvas.addEventListener('mouseup',   ()=>{isDrawing=false;});
-canvas.addEventListener('mouseleave',()=>{isDrawing=false;});
+// Prevent context menu on right click over canvas
+canvas.addEventListener('contextmenu', e => e.preventDefault());
 
-function applyTool(e){
-    const rect=canvas.getBoundingClientRect();
-    const x=Math.floor((e.clientX-rect.left)/pixelSize);
-    const y=Math.floor((e.clientY-rect.top)/pixelSize);
-    for(let dy=-brushSize;dy<=brushSize;dy++) for(let dx=-brushSize;dx<=brushSize;dx++){
-        if(Math.sqrt(dx*dx+dy*dy)<=brushSize){
-            const px=x+dx,py=y+dy;
-            if(px>=0&&px<width&&py>=0&&py<height){
-                if(isErasing) grid[py][px]=null;
-                else if(!grid[py][px]) grid[py][px]={type:selectedMaterial};
+canvas.addEventListener('mousedown', e => {
+    e.preventDefault();
+    isDrawing = true;
+    activeButton = e.button;
+    applyTool(e);
+});
+canvas.addEventListener('mousemove', e => {
+    if (isDrawing) applyTool(e);
+});
+canvas.addEventListener('mouseup', () => { isDrawing = false; activeButton = -1; });
+canvas.addEventListener('mouseleave', () => { isDrawing = false; activeButton = -1; });
+
+function applyTool(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / pixelSize);
+    const y = Math.floor((e.clientY - rect.top) / pixelSize);
+
+    // Right click (button 2) → always erase, regardless of eraser toggle
+    const eraseNow = (activeButton === 2) || isErasing;
+
+    // Frequency: brushFreq 10 = place all, 1 = ~10% chance per cell
+    // At freq 10, fillRatio = 1.0 (dense, no gaps)
+    // At freq 1,  fillRatio ≈ 0.08
+    const fillRatio = eraseNow ? 1.0 : Math.pow(brushFreq / 10, 1.5);
+
+    for (let dy = -brushSize; dy <= brushSize; dy++) {
+        for (let dx = -brushSize; dx <= brushSize; dx++) {
+            if (Math.sqrt(dx*dx + dy*dy) > brushSize) continue;
+            const px = x + dx, py = y + dy;
+            if (px < 0 || px >= width || py < 0 || py >= height) continue;
+
+            if (eraseNow) {
+                grid[py][px] = null;
+            } else {
+                // Only place if cell empty AND random check passes
+                if (!grid[py][px] && Math.random() < fillRatio) {
+                    grid[py][px] = { type: selectedMaterial };
+                }
             }
         }
     }
 }
 
 // ─── RENDER ─────────────────────────────────────────────────────────────────
-
-// Parse hex color to [r,g,b]
 function hexToRgb(hex) {
     const h = hex.replace('#','');
     return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
 }
-// Perceived brightness 0-255
 function brightness(r,g,b){ return 0.299*r + 0.587*g + 0.114*b; }
-// Lighten a color by amt (0-255)
 function lighten(r,g,b,amt){ return [Math.min(255,r+amt),Math.min(255,g+amt),Math.min(255,b+amt)]; }
-// Darken a color
 function darken(r,g,b,amt){ return [Math.max(0,r-amt),Math.max(0,g-amt),Math.max(0,b-amt)]; }
 
 function render(){
     const bg = lightMode ? '#ffffff' : '#000000';
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     const t = Date.now();
     const ps = pixelSize;
-
     for(let y=0;y<height;y++) for(let x=0;x<width;x++){
         const p=grid[y][x]; if(!p) continue;
         const mat=MATERIALS[p.type]; if(!mat) continue;
@@ -925,22 +885,14 @@ function render(){
             const fb=Math.round(127+127*Math.sin((hue+240)*Math.PI/180));
             c=`rgb(${fr},${fg},${fb})`;
         }
-        // Parse color to RGB for brightness check
         let r=128,g=128,b=128;
         const rgbMatch = c.match(/rgb\((\d+),(\d+),(\d+)\)/);
         if(rgbMatch){ r=+rgbMatch[1]; g=+rgbMatch[2]; b=+rgbMatch[3]; }
         else if(c.startsWith('#')&&c.length===7){ [r,g,b]=hexToRgb(c); }
-
         const br = brightness(r,g,b);
         const px = x*ps, py = y*ps;
-
-        // Draw main pixel
         ctx.fillStyle = c;
         ctx.fillRect(px, py, ps, ps);
-
-        // Visibility boost:
-        // Dark mode: very dark colors (br < 55) → tiny fill lift + intermittent bright border
-        // Light mode: very light colors (br > 200) → tiny fill darken + intermittent dark border
         if(!lightMode && br < 55) {
             const [lr,lg,lb] = lighten(r,g,b, 8);
             ctx.fillStyle = `rgb(${lr},${lg},${lb})`;
@@ -969,16 +921,13 @@ function render(){
     }
 }
 
-// ─── LOOP con control de velocidad ──────────────────────────────────────────
+// ─── LOOP ───────────────────────────────────────────────────────────────────
 let lastTime = 0;
-
 function update(timestamp){
     const dt = timestamp - lastTime;
     lastTime = timestamp;
-
     if (!isPaused) {
         accumulator += dt * simSpeed;
-        // tick each ~16.7ms of sim time
         const tickMs = 16.7;
         while (accumulator >= tickMs) {
             accumulator -= tickMs;
@@ -989,11 +938,9 @@ function update(timestamp){
                 if (ltr) { for (let x = 0; x < width; x++) { if (grid[y][x]) updateParticle(x, y); } }
                 else     { for (let x = width-1; x >= 0; x--) { if (grid[y][x]) updateParticle(x, y); } }
             }
-            // Cap at 4 ticks max per frame to avoid spiral of death
             if (accumulator > tickMs * 4) { accumulator = 0; break; }
         }
     }
-
     render();
     requestAnimationFrame(update);
 }
